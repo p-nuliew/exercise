@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>用props初始化data中变量</title>
+  <script src="https://cdn.bootcss.com/vue/2.5.16/vue.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <user-info :user-data="user"></user-info>
+  </div>
+  <script>
+    //全局组件
+    let userInfo = Vue.component('userInfo' ,{
+        name: 'user-info',
+        props: {
+            userData: Object
+        },
+        data() {
+          return {
+              userName: this.userData.name
+          }
+        },
+        watch: {
+          userData: function (newV, oldV) {
+            console.log(newV === this.userData);
+            console.log('newV, oldV: ', newV, oldV);
+            console.log('this.userData: ', this.userData);
+          },
+          userName: function (newV, oldV) {
+            console.log('newV, oldV: ', newV, oldV);
+
+          }
+        },
+        template: `
+            <div>
+                <div>姓名：{{userName}}</div>
+
+                <div>姓名：{{userData.name}}</div>
+                <div>性别：{{userData.gender}}</div>
+                <div>生日：{{userData.birthday}}</div>
+            </div>
+        `
+    });
+
+    //Vue实例
+    new Vue({
+        el: '#app',
+        data: {
+            user: {
+                name: '',
+                gender: '',
+                birthday: ''
+            }
+        },
+        created(){
+           this.getUserData();
+        },
+        methods:{
+            getUserData(){
+                setTimeout(()=>{
+                    // this.user = {
+                    //     name: '于永雨',
+                    //     gender: '男',
+                    //     birthday: '1991-7'
+                    // }
+                    this.user.name = '于永雨'
+                            this.user.gender = '男'
+                            this.user.birthday = '1991-7'
+
+                }, 500)
+            }
+        },
+        components: {
+            userInfo
+        }
+    });
+  </script>
+</body>
+</html>

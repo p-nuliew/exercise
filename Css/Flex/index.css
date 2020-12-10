@@ -1,0 +1,66 @@
+.bg{
+  background-color: pink;
+}
+.mt20{
+  margin-top: 20px;
+}
+
+.box1{
+  width:300px;
+  height:200px;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: space-between;
+}
+
+.box1 div{
+  width:100%;
+  height:30px;
+  border:1px solid red;
+}
+
+.height200{
+  height: 200px;
+}
+.height90{
+  height: 90px;
+}
+.height10{
+  height: 10px;
+}
+.height30{
+  height: 30px;
+}
+
+.red{
+  background: red;
+}
+.pink{
+  background-color: pink;
+}
+.blue{
+  background-color: blue;
+}
+
+.box2{
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.box2 .div1{
+  flex: auto;
+}
+
+.box2 .div2{
+  flex: inherit;
+}
+
+.flex {
+  display: flex;
+}
+.box3{
+  display: flex;
+  align-items: stretch;
+}

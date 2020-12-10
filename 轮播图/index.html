@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>轮播图</title>
+  <link rel="stylesheet" href="./index.css">
+</head>
+<body>
+  <div class="container">
+    <img class="item left" data-color="linear-gradient(#999, #e96a16)" src="../images/js1.jpg" alt="">
+    <img class="item middle" data-color="linear-gradient(#999, #2f4287)" src="../images/js2.jpg" alt="">
+    <img class="item right" data-color="linear-gradient(#999, #fcc8fb)" src="../images/js3.jpg" alt="">
+  </div>
+  <script>
+    const items = document.querySelectorAll('.item')
+    items.forEach(item => {
+      item.addEventListener('click', function() {
+        // 使被点击的图片到中间位置
+        this.classList.remove('left', 'middle', 'right');
+        this.classList.add('middle');
+        this.style.zIndex = '10';
+        // 改变背景
+        document.body.style.background = this.dataset.color;
+        // 被点击元素的左边元素变化
+        let left = this.previousElementSibling ?? items[items.length - 1];
+        left.style.zIndex = '5'
+        this.classList.remove('left', 'middle', 'right');
+        left.classList.add('left');
+        // 被点击元素的右边元素变化
+        let right = this.nextElementSibling ?? items[0];
+        this.classList.remove('left', 'middle', 'right');
+        right.classList.add('right');
+      })
+    })
+  </script>
+</body>
+</html>
