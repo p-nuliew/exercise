@@ -1,0 +1,15 @@
+{
+  "name": "dome01",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "eslint": "eslint src"
+  },
+  "devDependencies": {
+    "eslint": "^7.16.0",
+    "eslint-plugin-react": "^7.21.5",
+    "react": "16.8",
+    "react-dom": "^17.0.1"
+  }
+}
