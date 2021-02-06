@@ -3,7 +3,6 @@
 // 2. 构函函数 + new关键字
 // 3. Object.create() // 允许你为创建的对象选择一个原型对象，而不用定义构造函数
 
-
 // 对象属性索引
 let result = undefined;
 let o = undefined;
@@ -34,9 +33,9 @@ let o = undefined;
 //   myMethod: function(params) {
 //     // ...do something
 //   },
-  
+
 //   // 或者 这样写也可以
-  
+
 //   myOtherMethod(params) {
 //     // ...do something else
 //   }
@@ -45,7 +44,20 @@ let o = undefined;
 // 枚举一个对象的所有属性（从ES5开始）
 // for...in 依次访问一个对象及其原型链中所有可枚举的属性
 // Object.keys(o) 返回对象自身包含（不包括原型）的所有可枚举属性的名称的数组
-// Object.getOwnPropertyNames(o) 返回对象自身包含（不包括原型）的所有属性（无论是否可枚举）的名称的数组
+// Object.getOwnPropertyNames(o) 返回对象自身（不包括原型）的属性键（包括不可枚举属性，但是不包括键为Symbol类型的key）组成的数组
+// Object.getOwnPropertySymbols(o) 返回对象自身（不包括原型）属性键为Symbol类型的属性键（不包括不可枚举属性）组成的数组
+
+const obj = {
+  [Symbol(1)]: 1,
+  a: Symbol(2),
+};
+Object.defineProperty(obj, "enumerate", {
+  value: "enumerate",
+  enumerable: false,
+});
+console.log(Object.getOwnPropertyNames(obj)); // ['a', 'enumerate']
+
+console.log(Object.getOwnPropertySymbols(obj)); // [Symbol(1)]
 
 // defineProperty()：直接在一个Object构造器对象上定义一个新属性，或者修改一个对象的现有属性，并返回此对象
 // 语法：Object.defineProperty(obj, prop, descriptor)
@@ -57,7 +69,7 @@ let o = undefined;
 // 描述符如果同时拥有value或writable和set或set键，会产生异常
 // function Car (name, width) {
 //   this.color = 'black';
-  
+
 //   Object.defineProperty(this, 'name', {
 //     get: () => name,
 //     configurable: true
@@ -106,9 +118,9 @@ let o = undefined;
 //   set c(x) {
 //     this.a = x / 2;
 //   },
-  
+
 //   getD: function() {
-//     return this.e + 1; 
+//     return this.e + 1;
 //   },
 //   setD: function (val) {
 //     this.d = val;
@@ -117,7 +129,7 @@ let o = undefined;
 
 // result = o.a; // 1
 // result = o.b; // 2
-// o.c = 50; 
+// o.c = 50;
 // result = o.a; // 25
 // result = o.b; // 26
 
@@ -141,7 +153,7 @@ let o = undefined;
 // }
 // Object.defineProperty(Cd.prototype, 'name', {
 //   get() { return this.stored_name },
-//   set(val){ 
+//   set(val){
 //     this.stored_name = val;
 //    }
 // })
@@ -165,14 +177,12 @@ let o = undefined;
 // var w2 = new Ww('ww');
 // w1.name = 1;
 
-
-
 // 使用Object.defineProperty()定义一个已经声明的函数作为getter和setter的方法
 // function Ef() {
 //   function commonSet (property, val) {
 //     property = val;
 //   }
-  
+
 //   function commonGet (property) {
 //     return property;
 //   }
@@ -200,8 +210,6 @@ let o = undefined;
 
 // o.c = 10;
 // result = o;
-
-
 
 // this
 // 在方法中，this指向调用它的对象

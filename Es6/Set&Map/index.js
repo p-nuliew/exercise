@@ -16,7 +16,7 @@
 // Set结构的实例只有4个遍历方法用于遍历成员
 // result = set.keys();  // 返回键名组成的遍历器对象 Entries[1,2,3,4,5]
 // result = set.values();  // 返回键值组成的遍历器对象 Entries[1,2,3,4,5]
-// result = set.entries(); // 返回键值对组成的遍历器对象 
+// result = set.entries(); // 返回键值对组成的遍历器对象
 // result = set.forEach(_ => console.log(_)); // 参数为value，key，set使用回调函数遍历每个成员
 
 // 遍历改变原来的Set结构
@@ -30,20 +30,19 @@
 // 去重
 // result = [...set];  // ...内部使用的是for...of循环，然后转化为数组格式
 // 间接使用map或filter
-// result = [...set].map(_ => _ * 3) 
-// result = [...set].filter(_ => (_ % 2) === 0) 
+// result = [...set].map(_ => _ * 3)
+// result = [...set].filter(_ => (_ % 2) === 0)
 
 // console.log('set', set);
 // console.log('result: ', result);
 
-
 // Map：js中的对象只能用字符串当做键，Map数据结构各种类型的值都能当做键。Map比Object更合适“键值对”数据结构
 // Map 接受一个数组为参数。该数组的成员是一个个表示键值对的数组
-// const arr = [
-//   ['name', 'zhangsan'],
-//   ['age', 18]
-// ]
-// const map = new Map(arr); // Entries [ {"name" => "zhangsan"} ]
+const arr = [
+  ["name", "zhangsan"],
+  ["age", 18],
+];
+const map = new Map(arr); // Entries [ {"name" => "zhangsan"} ]
 // let result = null;
 
 // Map 实例的属性和方法
@@ -57,11 +56,9 @@
 // result = map.clear()  // 清除所有成员，没有返回值
 
 // 遍历方法
-// result = map.keys()  // 返回键名组成的遍历器对象
-// result = map.values()  // 返回键值组成的遍历器对象
-// result = map.entries()  // 返回所有成员组成的遍历器对象
-// result = map.forEach(_ => console.log(_))  // 遍历Map成员，参数为value，key，map
+result = map.keys(); // 返回键名组成的遍历器对象
+// result = map.values(); // 返回键值组成的遍历器对象
+// result = map.entries(); // 返回所有成员组成的遍历器对象
+// result = map.forEach((_) => console.log(_)); // 遍历Map成员，参数为value，key，map
 
-
-
-// console.log('result: ', result);
+console.log("result: ", result);
