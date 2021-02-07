@@ -27,30 +27,6 @@ outPoint: for (var i = 0; i < 10; i++) {
 // 当你不使用label时，它会终止一个while、do-while、while、switch 或者label语句
 // 使用label时，它会应用被 label 标识的循环语句。
 
-// for...in语句：循环一个对象的属性（包括可枚举和继承属性）
-// 不建议使用for...in遍历数组，推荐for...of
-let arr = [1, 2, 3];
-Array.prototype.xxx = 1231235;
-for (let i in arr) {
-  console.log(arr[i]);
-}
-// 1
-// 2
-// 3
-// 1231235
-
-// 为什么for in 不适合数组
-// 1、index 的类型是 String，并不是number，如果对index做运算，可能会导致一些错误
-// 2、原型链上的属性也会被遍历到
-// 3、遍历顺序可能是不确定的
-
-// hasOwnProperty 过滤掉原型链继承到的属性
-for (let i in arr) {
-  if (arr.hasOwnProperty(i)) {
-    console.log(arr[i]); // 输出 "1", "2", "3"
-  }
-}
-
 // for...of语句：循环一个可迭代对象（包括Array，Map，Set，arguments）
 for (let i of arr) {
   console.log(i); // 输出 "1", "2", "3"
