@@ -80,11 +80,15 @@ console.log(c3.name); // 'Parent3'
 console.log(c3.getName()); // 'Parent3'
 
 // 手动实现 call 和 apply
+// 分为三步骤：
+// 1.将函数设置为对象的属性
+// 2.执行这个函数
+// 3.删除这个函数
 Function.prototype.call2 = function (context, ...args) {
-  var context = context || window;
-  context.fn = this;
-  var result = eval("context.fn(...args)");
-  delete context.fn;
+  var context = context || window; // context为null时，上下文指向window
+  context.fn = this; // this为调用call2的函数，我们将它绑定到对象的临时属性上，这样函数里的this指向了context
+  var result = context.fn(...args); // 执行这个属性函数，并传入我们的参数
+  delete context.fn; // 删除这个临时属性
   return result;
 };
 console.log(Math.max.call2(Math, 1, 2, 3));
@@ -92,8 +96,18 @@ console.log(Math.max.call2(Math, 1, 2, 3));
 Function.prototype.apply2 = function (context, args) {
   var context = context || window;
   context.fn = this;
-  var result = eval("context.fn(...args)");
+  var result = context.fn(...args);
   delete context.fn;
   return result;
 };
 console.log(Math.max.apply2(Math, [1, 2, 3]));
+
+function Parent5() {
+  this.name = "parent";
+}
+
+function Child5() {
+  Parent5.call(this);
+}
+var c = new Child5();
+console.log("c: ", c);
