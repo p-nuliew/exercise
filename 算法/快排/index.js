@@ -1,4 +1,4 @@
-var arr1 = [1, 3, 5];
+var arr1 = [1, 6, 63, 5];
 function quickSort(arr) {
   var arrLength = arr.length;
   console.log("arrLength: ", arrLength);
@@ -18,22 +18,22 @@ function quickSort(arr) {
   return quickSort(left).concat([base], quickSort(right));
 }
 
-console.log(arr1 === quickSort(arr1));
+console.log(quickSort(arr1));
 
-var arr2 = [3, 34];
-function qs(arr) {
-  if (arr.length <= 1) return arr;
-  const left = [];
-  const right = [];
-  const [a, ...rest] = arr;
-  rest.forEach((x) => {
-    if (x < a) {
-      left.push(x);
-    } else {
-      right.push(x);
-    }
-  });
+// var arr2 = [3, 34];
+// function qs(arr) {
+//   if (arr.length <= 1) return arr;
+//   const left = [];
+//   const right = [];
+//   const [a, ...rest] = arr;
+//   rest.forEach((x) => {
+//     if (x < a) {
+//       left.push(x);
+//     } else {
+//       right.push(x);
+//     }
+//   });
 
-  return [...qs(left), a, ...qs(right)];
-}
-console.log(arr2 === qs(arr2));
+//   return [...qs(left), a, ...qs(right)];
+// }
+// console.log(arr2 === qs(arr2));

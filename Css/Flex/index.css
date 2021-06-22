@@ -50,7 +50,10 @@
 }
 
 .box2 .div1{
-  flex: auto;
+  /* flex: auto; */
+  flex-basis: 30px;
+  flex-grow: 1;
+  /* flex-shrink: 0; */
 }
 
 .box2 .div2{
@@ -63,4 +66,13 @@
 .box3{
   display: flex;
   align-items: stretch;
+}
+
+.box4{
+  display: flex;
+  align-items: baseline;
+}
+
+.box4 .div42{
+  font-size: 33px;
 }
