@@ -126,7 +126,7 @@ function isValid (s) {
   const stack = new Stack()
 
   for(let i = 0, len = s.length; i < len; i++) {
-    const c = s[i]  // 当前元素
+    const c = s[i]  // 当前字符（必须要拿右括号匹配，匹配上了删除栈顶字符（左括号））
 
     const p = stack.peek()  // 栈顶节点
     if (c ===')' && p === '(' || c === ']' && p === '[' || c === '}' && p === '{') {
@@ -139,7 +139,7 @@ function isValid (s) {
   return stack.isEmpty()
 }
 
-console.log(isValid('()[]{}'));
+console.log(isValid('([]){}'));
 console.log(isValid('(]'));
 
 
