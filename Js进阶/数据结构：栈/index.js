@@ -143,4 +143,27 @@ console.log(isValid('([]){}'));
 console.log(isValid('(]'));
 
 
+function isValid2 (str) {
+  const arr = []
 
+  for(let i = 0, len = str.length; i < len; i++) {
+    const c = str[i]
+
+    // 栈顶节点
+    const t = arr[arr.length - 1]
+
+    // 栈的思维，所以从右括号开始匹配
+    if (c === ')' && t === '(' || c === ']' && t === '[' || c === '}' && t === '{') {
+      // 匹配 出栈
+      arr.pop()
+    } else {
+      arr.push(c)
+    }
+  }
+
+  return arr.length === 0
+}
+
+
+console.log(isValid2('([]){}'));
+console.log(isValid2('(]'));
