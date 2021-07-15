@@ -31,6 +31,25 @@
 .height30{
   height: 30px;
 }
+.height-100{
+  height: 100%;
+}
+.max-height40{
+  max-height: 40px;
+}
+.line-height20{
+  line-height: 20px;
+}
+.inline-block{
+  display: inline-block;
+}
+
+.w200{
+  width: 200px;
+}
+.w100{
+  width: 100px;
+}
 
 .red{
   background: red;
@@ -40,6 +59,23 @@
 }
 .blue{
   background-color: blue;
+}
+.flex {
+  display: flex;
+}
+.flex-wrap{
+  flex-wrap: wrap;
+}
+.flex-column{
+  flex-direction: column;
+}
+
+.limit2{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .box2{
@@ -60,9 +96,6 @@
   flex: inherit;
 }
 
-.flex {
-  display: flex;
-}
 .box3{
   display: flex;
   align-items: stretch;
@@ -76,3 +109,4 @@
 .box4 .div42{
   font-size: 33px;
 }
+
