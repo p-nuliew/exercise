@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="index.css">
+  <title>Document</title>
+</head>
+<body>
+  <div class="header">双飞翼布局是圣杯布局的优化版</div>
+  <div class="main clearfix">
+    <!-- 因为相对来说，center中为主要内容，所以写前边，这样也有利于SEO -->
+    <!-- 圣杯布局 -->
+    <!-- <div class="center">中间自适应</div>   -->
+    <!-- 双飞翼布局 -->
+    <div class="center">
+      <div class="inner">中间自适应</div>
+    </div>
+
+    <div class="left">左列定宽</div>
+    <div class="right">右列定宽</div>
+  </div>
+  <div class="footer">底部</div>
+  <script src="./index.js"></script>
+</body>
+</html>
