@@ -8,7 +8,7 @@ const data = [
   { heightPrice: 110, lowPrice: 50, openingPrice: 80, closingPice: 100 },
   { heightPrice: 130, lowPrice: 35, openingPrice: 80, closingPice: 70 },
   { heightPrice: 114, lowPrice: 65, openingPrice: 90, closingPice: 98 },
-  { heightPrice: 94, lowPrice: 20, openingPrice: 51, closingPice: 93 },
+  { heightPrice: 94, lowPrice: 15, openingPrice: 51, closingPice: 93 },
   { heightPrice: 122, lowPrice: 33, openingPrice: 87, closingPice: 79 },
   { heightPrice: 122, lowPrice: 53, openingPrice: 87, closingPice: 99 },
   { heightPrice: 122, lowPrice: 53, openingPrice: 87, closingPice: 99 },
@@ -30,8 +30,10 @@ if (canvas.getContext) {
   const triangleH = 10
   // 刻度线宽度
   const tickWidth = 5
-  // y轴元素数量
-  const yElementCount = 8
+  // x轴刻度数量
+  const xAxisTickCount = data.length
+  // y轴刻度数量
+  const yAxisTickCount = 8
   // y轴刻度间距
   const yAxisTickSpace = 20
   // x轴刻度间距
@@ -52,39 +54,64 @@ if (canvas.getContext) {
   const x2 = width - space
   const y2 = height - space
 
-  // 1.2 绘制y轴
-  ctx.beginPath()
-  ctx.moveTo(x0, y0)
-  ctx.lineTo(x1, y1)
-  ctx.closePath();
-  ctx.stroke()
+  // 1.2 绘制Y轴
+  function renderYAxis (x0, y0, x1, y1) {
+    ctx.beginPath()
+    ctx.moveTo(x0, y0)
+    ctx.lineTo(x1, y1)
+    ctx.closePath();
+    ctx.stroke()
+  }
+  renderYAxis(x0, y0, x1, y1)
 
   // 1.3 绘制x轴
-  ctx.beginPath()
-  ctx.moveTo(x0, y0)
-  ctx.lineTo(x2, y2)
-  ctx.closePath();
-  ctx.stroke()
+  function renderXAxis (x0, y0, x2, y2) {
+    ctx.beginPath()
+    ctx.moveTo(x0, y0)
+    ctx.lineTo(x2, y2)
+    ctx.closePath();
+    ctx.stroke()
+  }
+  renderXAxis(x0, y0, x2, y2)
 
-  // 1.4 绘制y轴三角形
-  // 三角形顶点(x1, y1), 左下点(x1 - triangleH/2, y1 + triangleH), 右下点(x1 + triangleH/2, y1 + triangleH)
-  ctx.beginPath()
-  ctx.moveTo(x1, y1)
-  ctx.lineTo(x1 - triangleH/2, y1 + triangleH)
-  ctx.lineTo(x1 + triangleH/2, y1 + triangleH)
-  ctx.fill()
+  /**
+   * 绘制y轴三角形
+   * @param {number} x1 y轴顶点横坐标
+   * @param {number}} y1 y轴顶点纵坐标
+   * @param {number}} triangleH 三角形高度
+   */
+  function renderYAxisTriangle (x1, y1, triangleH) {
+    ctx.beginPath()
+    ctx.moveTo(x1, y1)
+    ctx.lineTo(x1 - triangleH/2, y1 + triangleH)
+    ctx.lineTo(x1 + triangleH/2, y1 + triangleH)
+    ctx.fill()
+  }
+  renderYAxisTriangle(x1, y1, triangleH)
 
-  // 1.5 绘制x轴三角形
-  // 三角形顶点(x2, y2), 左下点(x2 - triangleH, y2 - triangleH/2), 右下点(x2 - triangleH, y2 + triangleH/2)
-  ctx.beginPath()
-  ctx.moveTo(x2, y2)
-  ctx.lineTo(x2 - triangleH, y2 - triangleH/2)
-  ctx.lineTo(x2 - triangleH, y2 + triangleH/2)
-  ctx.fill()
+  /**
+   * 绘制x轴三角形。三角形顶点(x2, y2), 左下点(x2 - triangleH, y2 - triangleH/2), 右下点(x2 - triangleH, y2 + triangleH/2)
+   * @param {number} x2 x轴顶点横坐标
+   * @param {number}} y2 x轴顶点纵坐标
+   * @param {number}} triangleH 三角形高度
+   */
+  function renderXAxisTriangle (x2, y2, triangleH) {
+    ctx.beginPath()
+    ctx.moveTo(x2, y2)
+    ctx.lineTo(x2 - triangleH, y2 - triangleH/2)
+    ctx.lineTo(x2 - triangleH, y2 + triangleH/2)
+    ctx.fill()
+  }
+  renderXAxisTriangle(x2, y2, triangleH)
 
-  // 1.6 绘制刻度线
-  // 开始坐标点和结束坐标点的坐标
-  function yAxisTick (sx, sy, ex, ey) {
+  /**
+   * 绘制刻度线
+   * @param {sx} sx 开始坐标点横坐标
+   * @param {sy} sy 开始坐标点纵坐标
+   * @param {ex} ex 结束坐标点横坐标
+   * @param {ey} ey 结束坐标点纵坐标
+   */
+  function renderAxisTick (sx, sy, ex, ey) {
     ctx.beginPath()
     ctx.moveTo(sx, sy)
     ctx.lineTo(ex, ey)
@@ -99,59 +126,86 @@ if (canvas.getContext) {
    * @param {number} y 纵坐标
    * @param {string} textAlign 文本对齐方式
    */
-  function axisText (text, x, y, textAlign) {
-    ctx.fillStyle="#FF0000";  // 文字颜色
-    ctx.textBaseline="middle";
-    ctx.textAlign=textAlign;
+  function renderAxisText (text, x, y, textAlign) {
+    ctx.fillStyle = "#FF0000";  // 文字颜色
+    ctx.textBaseline = "middle";
+    ctx.textAlign = textAlign;
 
-    ctx.font="10px Arial";  // 高为10px的字体
+    ctx.font = "10px Arial";  // 高为10px的字体
     ctx.fillText(text, x, y)  // 描绘实体文字
   }
 
-  // 1.6.1 绘制y轴刻度
-  for (let i = 0; i < yElementCount; i++) {
-    let sx, sy, ex, ey
-    sx = x0
-    sy = y0 - yAxisTickSpace * i
-    ex = x0 + tickWidth
-    ey = y0 - yAxisTickSpace * i
+  /**
+   * 绘制y轴刻度
+   * @param {number} yAxisTickSpace y轴刻度间距
+   * @param {number} tickWidth 刻度宽度
+   * @param {number} yAxisTickCount y轴刻度数量
+   * @param {number} x0 原点横坐标
+   * @param {number} y0 原点纵坐标
+   */
+  function renderYAxisTick (yAxisTickSpace, tickWidth, yAxisTickCount, x0, y0) {
+    for (let i = 0; i < yAxisTickCount; i++) {
+      let sx, sy, ex, ey
+      sx = x0
+      sy = y0 - yAxisTickSpace * i
+      ex = x0 + tickWidth
+      ey = y0 - yAxisTickSpace * i
 
-    axisText(yAxisTickSpace * i, sx - 5, sy, 'right')  // y轴刻度文字
-    yAxisTick(sx, sy, ex, ey)
+      renderAxisText(yAxisTickSpace * i, sx - 5, sy, 'right')  // y轴刻度文字
+      renderAxisTick(sx, sy, ex, ey)
+    }
   }
+  renderYAxisTick(yAxisTickSpace, tickWidth, yAxisTickCount, x0, y0)
 
-  // 1.6.1 绘制x轴刻度
-  for (let i = 0; i < data.length; i++) {
+  /**
+   * 绘制x轴刻度
+   * @param {number} xAxisTickSpace x轴刻度间距
+   * @param {number} tickWidth 刻度宽度
+   * @param {number} xAxisTickCount x轴刻度数量
+   * @param {number} x0 原点横坐标
+   * @param {number} y0 原点纵坐标
+   */
+  function renderXAxisTick (xAxisTickSpace, tickWidth, xAxisTickCount, x0, y0) {
+    for (let i = 0; i < xAxisTickCount; i++) {
+      // sx, sy, ex, ey 分别表示刻度的开始横坐标，开始纵坐标，结束横坐标，结束纵坐标
+      let sx, sy, ex, ey
+      sx = x0 + i * xAxisTickSpace
+      sy = y0
+      ex = x0 + i * xAxisTickSpace
+      ey = y0 + tickWidth
+
+      renderAxisText(i, ex, ey + 10, 'center')  // x轴刻度文字
+      renderAxisTick(sx, sy, ex, ey)
+    }
+  }
+  renderXAxisTick(xAxisTickSpace, tickWidth, xAxisTickCount, x0, y0)
+
+
+  // 绘制所有蜡烛
+  for (let i = 0; i < xAxisTickCount; i++) {
     // 暂时跳过第一个
     if (i === 0) continue
 
     const { heightPrice, lowPrice, openingPrice, closingPice } = data[i]
-    // sx, sy, ex, ey 分别表示刻度的开始横坐标，开始纵坐标，结束横坐标，结束纵坐标
-    let sx, sy, ex, ey
-    sx = x0 + i * xAxisTickSpace
-    sy = y0
-    ex = x0 + i * xAxisTickSpace
-    ey = y0 + tickWidth
 
-    axisText(i, ex, ey + 10, 'center')  // x轴刻度文字
-    yAxisTick(sx, sy, ex, ey)
-
+    // 刻度横坐标
+    const sx = x0 + i * xAxisTickSpace
 
     // 最低价坐标点
     const lowPricePointX = sx
-    const lowPricePointY = sy - lowPrice
+    const lowPricePointY = y0 - lowPrice
 
     // 开盘价坐标点
     const openingPricePointX = sx
-    const openingPricePointY = sy - openingPrice
+    const openingPricePointY = y0 - openingPrice
 
     // 收盘价坐标点
     const closingPicePointX = sx
-    const closingPicePointY = sy - closingPice
+    const closingPicePointY = y0 - closingPice
 
     // 最高价坐标点
     const heightPricePointX = sx
-    const heightPricePointY = sy - heightPrice
+    const heightPricePointY = y0 - heightPrice
 
     let color = ''
     // 蜡烛顶部坐标
@@ -185,11 +239,24 @@ if (canvas.getContext) {
       lowPricePointY,
       heightPricePointX,
       heightPricePointY,
-      color
+      color,
+      candleW
     )
   }
 
-  // 2.绘制蜡烛
+  /**
+   * 绘制蜡烛
+   * @param {number} candleTopPointX 蜡烛顶点横坐标
+   * @param {number} candleTopPointY 蜡烛顶点纵坐标
+   * @param {number} candleBottomPointX 蜡烛底点横坐标
+   * @param {number} candleBottomPointY 蜡烛底点纵坐标
+   * @param {number} lowPricePointX 最低价横坐标
+   * @param {number} lowPricePointY 最低价纵坐标
+   * @param {number} heightPricePointX 最高价横坐标
+   * @param {number} heightPricePointY 最高价纵坐标
+   * @param {string} color 烛身颜色
+   * @param {number} candleW 蜡烛宽度
+   */
   function renderCandle (
     candleTopPointX,
     candleTopPointY,
@@ -199,11 +266,12 @@ if (canvas.getContext) {
     lowPricePointY,
     heightPricePointX,
     heightPricePointY,
-    color
+    color,
+    candleW
   ) {
     const halfCandleW = candleW / 2
 
-    // 绘制蜡烛下面部分
+    // 绘制蜡烛下影线
     ctx.beginPath()
     ctx.moveTo(lowPricePointX, lowPricePointY)
     ctx.lineTo(candleBottomPointX, candleBottomPointY)
@@ -217,7 +285,7 @@ if (canvas.getContext) {
     ctx.fillStyle = color
     ctx.fill();
 
-    // 绘制蜡烛上面部分
+    // 绘制蜡烛上影线
     ctx.beginPath()
     ctx.moveTo(candleTopPointX, candleTopPointY)
     ctx.lineTo(heightPricePointX, heightPricePointY)
@@ -225,36 +293,16 @@ if (canvas.getContext) {
     ctx.stroke()
   }
 
-  // 3. 绘制贝塞尔曲线
-  function renderBezierCurve () {
-  }
-
-  // 收盘价折线图
-  // ctx.beginPath()
-  // for (let i = 0; i < data.length; i++) {
-  //   const { heightPrice, lowPrice, openingPrice, closingPice } = data[i]
-  //   sx = x0 + i * xAxisTickSpace
-  //   sy = y0
-  //   // 收盘价坐标点
-  //   const closingPicePointX = sx
-  //   const closingPicePointY = sy - closingPice
-
-  //   if (i === 0) {
-  //     continue
-  //   }
-  //   ctx.lineTo(closingPicePointX, closingPicePointY)
-  // }
-  // ctx.stroke()
-
-  // 收盘价曲线
+  // 最低价贝塞尔曲线
   // TODO 计算不对
   ctx.beginPath()
-  for (let i = 0; i < data.length; i++) {
-    if (i < 1 || i === data.length - 1) {
+  for (let i = 0; i < xAxisTickCount; i++) {
+    // 忽略第一个和最后一个
+    if (i < 1 || i === xAxisTickCount - 1) {
       continue
     }
 
-    const { heightPrice, lowPrice, openingPrice, closingPice } = data[i]
+    const { lowPrice } = data[i]
     const prevNode = data[i - 1]
     const nextNode = data[i + 1]
 
@@ -268,7 +316,8 @@ if (canvas.getContext) {
     const lowPricePointY = sy - lowPrice
 
     // 三角形的高
-    const triangleHeight = Math.abs(nextNode.closingPice - prevNode.closingPice)
+    const triangleHeight = Math.abs(nextNode.lowPrice - prevNode.lowPrice)
+    console.log('triangleHeight: ', triangleHeight);
     // 三角形底边
     const triangleBottomLine = xAxisTickSpace * 2
     // 三角形斜边 = (高的平方+底边的平方)的平方根
@@ -283,29 +332,31 @@ if (canvas.getContext) {
 
     // 前一个控制点坐标
     let prevControlX = undefined
-    // 如果下个控制点的收盘价小于前个控制点的收盘价
-    if (nextNode.closingPice < prevNode.closingPice) {
+    let prevControlY = undefined
+    // 后一个控制点坐标
+    let nextControlX = undefined
+    let nextControlY = undefined
+    // 如果下个控制点的最低价高于前个控制点的最低价
+    if (nextNode.lowPrice < prevNode.lowPrice) {
       prevControlX = lowPricePointX - controlPointBottomLine / 2
       prevControlY = lowPricePointY + controlPointHeight / 2
+
+      nextControlX = lowPricePointX + controlPointBottomLine / 2
+      nextControlY = lowPricePointY - controlPointHeight / 2
     } else {
       prevControlX = lowPricePointX + controlPointBottomLine / 2
       prevControlY = lowPricePointY - controlPointHeight / 2
-    }
 
-    console.log('lowPricePointX, lowPricePointY: ', lowPricePointX, lowPricePointY);
-    console.log('prevControlX, prevControlY: ', prevControlX, prevControlY);
+      nextControlX = lowPricePointX - controlPointBottomLine / 2
+      nextControlY = lowPricePointY + controlPointHeight / 2
+    }
 
     if (i === 1) {
       ctx.moveTo(lowPricePointX, lowPricePointY);
     } else {
+      // ctx.quadraticCurveTo(prevControlX, prevControlY, nextControlX, nextControlY, lowPricePointX, lowPricePointY);
       ctx.quadraticCurveTo(prevControlX, prevControlY, lowPricePointX, lowPricePointY);
-      // ctx.quadraticCurveTo(prevControlX, prevControlY, lowPricePointX, lowPricePointY)
     }
   }
   ctx.stroke();
 }
-
-
-// 1. 贝塞尔曲线
-
-// 2. 封装函数（自己的点转换为canvas的点）
