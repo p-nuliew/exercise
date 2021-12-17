@@ -295,163 +295,121 @@ if (canvas.getContext) {
     ctx.stroke()
   }
 
-  // 最低价贝塞尔曲线
-  // TODO 计算不对
-  // const data = [
-  //   { heightPrice: 110, lowPrice: 50, openingPrice: 80, closingPice: 100 },
-  //   { heightPrice: 130, lowPrice: 35, openingPrice: 80, closingPice: 70 },
-  //   { heightPrice: 114, lowPrice: 65, openingPrice: 90, closingPice: 98 },
-  //   { heightPrice: 94, lowPrice: 15, openingPrice: 51, closingPice: 93 },
-  //   { heightPrice: 122, lowPrice: 33, openingPrice: 87, closingPice: 79 },
-  //   { heightPrice: 122, lowPrice: 53, openingPrice: 87, closingPice: 99 },
-  //   { heightPrice: 122, lowPrice: 53, openingPrice: 87, closingPice: 99 },
-  //   { heightPrice: 114, lowPrice: 40, openingPrice: 90, closingPice: 98 },
-  //   { heightPrice: 94, lowPrice: 30, openingPrice: 51, closingPice: 83 },
-  //   { heightPrice: 122, lowPrice: 53, openingPrice: 87, closingPice: 99 },
-  // ]
+  // 获取当前点以及前后控制点坐标
+  const getControlPointInfo = (data, x0, y0, xAxisTickSpace) => {
+    let controlPoint = []
 
-  // 二次贝塞尔曲线
-  // quadraticCurveTo(cp1x, xp1y, x, y)
-  // ctx.beginPath();
-  // ctx.moveTo(50, 50);
-  // ctx.quadraticCurveTo(75, 50, 100, 100); // 100 100 作为下段曲线的开始点
-  // ctx.quadraticCurveTo(125, 50, 150, 50);
-  // ctx.stroke();
+    for (let i = 0; i < data.length; i++) {
+      const { lowPrice } = data[i]
+      let prevNode = {}
+      let nextNode = {}
 
-   //三次贝塞尔曲线
-  //  ctx.beginPath();
-  //  ctx.moveTo(75, 40);
-  //  ctx.bezierCurveTo(75, 37, 70, 25, 50, 25);
-  //  ctx.bezierCurveTo(20, 25, 20, 62.5, 20, 62.5);
-  //  ctx.fill();
+      // 边界处理：在首尾加入虚拟点，不全第一个元素没有前控制点，末尾元素没有后控制点的情况
+      if (i === 0) {
+        prevNode = { heightPrice: 100, lowPrice: 60, openingPrice: 70, closingPice: 99 }
+        nextNode = data[i + 1]
+      } else if (i === data.length - 1) {
+        prevNode = data[i - 1]
+        nextNode = { heightPrice: 101, lowPrice: 20, openingPrice: 72, closingPice: 89 }
+      } else {
+        prevNode = data[i - 1]
+        nextNode = data[i + 1]
+      }
 
-  // 当前点和前后控制点的集合
-  // [{ curControlX: lowPricePointX, curControlY: lowPricePointY }, { prevControlX, prevControlY }, { nextControlX, nextControlY }, ...]
-  let controlPoint = []
+      // sx, sy 分别表示刻度的开始横坐标，开始纵坐标
+      let sx, sy
+      sx = x0 + i * xAxisTickSpace
+      sy = y0
 
-  for (let i = 0; i < data.length; i++) {
-    const { lowPrice } = data[i]
-    let prevNode = {}
-    let nextNode = {}
+      // 最低价坐标点
+      const lowPricePointX = sx
+      const lowPricePointY = sy - lowPrice
 
-    // 边界处理：在首尾加入虚拟点，以处理第一个元素没有前控制点，末尾元素没有后控制点的情况
-    if (i === 0) {
-      prevNode = { heightPrice: 100, lowPrice: 60, openingPrice: 70, closingPice: 99 }
-      nextNode = data[i + 1]
-    } else if (i === data.length - 1) {
-      prevNode = data[i - 1]
-      nextNode = { heightPrice: 101, lowPrice: 70, openingPrice: 72, closingPice: 89 }
-    } else {
-      prevNode = data[i - 1]
-      nextNode = data[i + 1]
+      // 前后点构成的三角形
+      // b: 三角形的高
+      const triangleHeight = Math.abs(nextNode.lowPrice - prevNode.lowPrice)
+      // a: 三角形底边
+      const triangleBottomLine = xAxisTickSpace * 2
+      // c: 三角形斜边 = (高的平方+底边的平方)的平方根
+      const triangleHypotenuse = Math.sqrt(Math.pow(triangleHeight, 2) +  Math.pow(triangleBottomLine, 2))
+
+      // 前后控制点为斜边的三角形
+      // C: 控制点三角形斜边长度(自定义)
+      const controlPointW = xAxisTickSpace * 0.5
+      // A: 控制点三角形底边
+      const controlPointBottomLine = controlPointW * triangleBottomLine / triangleHypotenuse
+      // B: 控制点三角形的高
+      const controlPointHeight = controlPointW * triangleHeight / triangleHypotenuse
+
+      // 前一个控制点坐标
+      let prevControlX = undefined
+      let prevControlY = undefined
+      // 后一个控制点坐标
+      let nextControlX = undefined
+      let nextControlY = undefined
+      // 如果下个控制点的最低价高于前个控制点的最低价
+      // TODO 计算逻辑需要整理、注释
+      if (nextNode.lowPrice < prevNode.lowPrice) {
+        // 左低右高
+        prevControlX = lowPricePointX - controlPointBottomLine / 2
+        prevControlY = lowPricePointY - controlPointHeight / 2
+
+        nextControlX = lowPricePointX + controlPointBottomLine / 2
+        nextControlY = lowPricePointY + controlPointHeight / 2
+      } else {
+        prevControlX = lowPricePointX - controlPointBottomLine / 2
+        prevControlY = lowPricePointY + controlPointHeight / 2
+
+        nextControlX = lowPricePointX + controlPointBottomLine / 2
+        nextControlY = lowPricePointY - controlPointHeight / 2
+      }
+
+      controlPoint.push({
+        curX: lowPricePointX,
+        curY: lowPricePointY,
+        prevControlX,
+        prevControlY,
+        nextControlX,
+        nextControlY
+       })
     }
 
-    // sx, sy 分别表示刻度的开始横坐标，开始纵坐标
-    let sx, sy
-    sx = x0 + i * xAxisTickSpace
-    sy = y0
-
-    // 最低价坐标点
-    const lowPricePointX = sx
-    const lowPricePointY = sy - lowPrice
-
-    // 前后点构成的三角形
-    // b: 三角形的高
-    const triangleHeight = Math.abs(nextNode.lowPrice - prevNode.lowPrice)
-    // a: 三角形底边
-    const triangleBottomLine = xAxisTickSpace * 2
-    // c: 三角形斜边 = (高的平方+底边的平方)的平方根
-    const triangleHypotenuse = Math.sqrt(Math.pow(triangleHeight, 2) +  Math.pow(triangleBottomLine, 2))
-
-    // 前后控制点为斜边的三角形
-    // C: 控制点三角形斜边长度(自定义)
-    const controlPointW = xAxisTickSpace * 0.5
-    // A: 控制点三角形底边
-    const controlPointBottomLine = controlPointW * triangleBottomLine / triangleHypotenuse
-    // B: 控制点三角形的高
-    const controlPointHeight = controlPointW * triangleHeight / triangleHypotenuse
-
-    // 前一个控制点坐标
-    let prevControlX = undefined
-    let prevControlY = undefined
-    // 后一个控制点坐标
-    let nextControlX = undefined
-    let nextControlY = undefined
-    // 如果下个控制点的最低价高于前个控制点的最低价
-    // TODO 计算逻辑需要整理、注释
-    if (nextNode.lowPrice < prevNode.lowPrice) {
-      console.log('i', i);
-      // 左低右高
-      prevControlX = lowPricePointX - controlPointBottomLine / 2
-      prevControlY = lowPricePointY - controlPointHeight / 2
-
-      nextControlX = lowPricePointX + controlPointBottomLine / 2
-      nextControlY = lowPricePointY + controlPointHeight / 2
-    } else {
-      console.log('ii', i);
-      prevControlX = lowPricePointX - controlPointBottomLine / 2
-      prevControlY = lowPricePointY + controlPointHeight / 2
-
-      nextControlX = lowPricePointX + controlPointBottomLine / 2
-      nextControlY = lowPricePointY - controlPointHeight / 2
-    }
-    console.log('cur: ', lowPricePointX, lowPricePointY);
-
-    // test: 连接控制点
-    // ctx.beginPath();
-    // ctx.moveTo(prevControlX, prevControlY);
-    // console.log('prevControlX, prevControlY: ', prevControlX, prevControlY);
-    // ctx.lineTo(nextControlX, nextControlY);
-    // console.log('nextControlX, nextControlY: ', nextControlX, nextControlY);
-    // ctx.closePath(); // 手动闭合
-    // ctx.strokeStyle = '#' + Math.random().toString().slice(2, 8)
-    // ctx.stroke();    // 通过线条绘制图形
-
-    controlPoint.push({
-      curX: lowPricePointX,
-      curY: lowPricePointY,
-      prevControlX,
-      prevControlY,
-      nextControlX,
-      nextControlY
-     })
+    return controlPoint
   }
 
-  console.log('controlPoint: ', controlPoint);
-  // ctx.beginPath();
-  for (let i = 0; i < controlPoint.length; i++) {
-    const {
-      curX,
-      curY,
-      prevControlX,
-      prevControlY,
-      nextControlX,
-      nextControlY
-    } = controlPoint[i]
+  /**
+   * 绘制贝塞尔曲线
+   * @param {array} controlPoint 控制点集合:  [{ curX: lowPricePointX, curY: lowPricePointY, prevControlX, prevControlY, nextControlX, nextControlY } ...]
+   */
+  const renderBezierCurve = controlPoint => {
+    ctx.beginPath();
+    for (let i = 0; i < controlPoint.length; i++) {
+      const {
+        curX,
+        curY,
+        prevControlX,
+        prevControlY,
+      } = controlPoint[i]
 
-    if (i > 0 && i < controlPoint.length) {
-      const prevNode = controlPoint[i - 1]
-      // ctx.lineTo(prevNode.nextControlX, prevNode.nextControlY)
-      // ctx.lineTo(prevControlX, prevControlY)
-      // ctx.lineTo(curX, curY)
+      if (i > 0 && i < controlPoint.length) {
+        const prevNode = controlPoint[i - 1]
+        // 验证控制点是否正确
+        // ctx.lineTo(prevNode.nextControlX, prevNode.nextControlY)
+        // ctx.lineTo(prevControlX, prevControlY)
+        // ctx.lineTo(curX, curY)
 
-      ctx.bezierCurveTo(prevNode.nextControlX, prevNode.nextControlY, prevControlX, prevControlY, curX, curY);
-      console.log('curX, curY: ', curX, curY);
-    } else if ( i === 0) {
-      ctx.moveTo(curX, curY);
-      console.log('i === 0: ');
+        ctx.bezierCurveTo(prevNode.nextControlX, prevNode.nextControlY, prevControlX, prevControlY, curX, curY);
+      } else if ( i === 0) {
+        ctx.moveTo(curX, curY);
+      }
     }
+    ctx.stroke();
   }
-  ctx.stroke();
-
-    // 绘制当前点的后半段曲线
-  const curveAllPoint = []
-
-  // 绘制曲线的数据
-  // curveAllPoint
-
+  renderBezierCurve(getControlPointInfo(data, x0, y0, xAxisTickSpace))
 }
 
 // 1. 处理边界问题
 // 2. 数据整合成我们需要的ui数据
 // 3. 封装
+
+// 以视图（折线）的方式验证结果（前后控制点）是否正确
