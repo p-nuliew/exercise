@@ -6,9 +6,9 @@ canvas.style.background = 'pink'
 // 开盘价、收盘价处于最高价和最低价之间
 const data = [
   { heightPrice: 110, lowPrice: 40, openingPrice: 80, closingPice: 100 },
-  { heightPrice: 160, lowPrice: 30, openingPrice: 80, closingPice: 70 },
-  { heightPrice: 114, lowPrice: 80, openingPrice: 90, closingPice: 100 },
-  { heightPrice: 194, lowPrice: 15, openingPrice: 51, closingPice: 93 },
+  { heightPrice: 100, lowPrice: 30, openingPrice: 80, closingPice: 70 },
+  { heightPrice: 300, lowPrice: 50, openingPrice: 90, closingPice: 100 },
+  { heightPrice: 95, lowPrice: 15, openingPrice: 51, closingPice: 93 },
   { heightPrice: 122, lowPrice: 20, openingPrice: 87, closingPice: 79 },
   { heightPrice: 122, lowPrice: 53, openingPrice: 87, closingPice: 99 },
   { heightPrice: 122, lowPrice: 53, openingPrice: 87, closingPice: 99 },
@@ -67,6 +67,8 @@ if (canvas.getContext) {
   const xAxisVertexX = width - space
   // x轴顶点纵坐标
   const xAxisVertexY = height - space
+  // 价格纵坐标
+  const priceY = price => originY - price / priceAndHeightRate
 
   // 1.2 绘制Y轴
   function renderYAxis () {
@@ -202,19 +204,19 @@ if (canvas.getContext) {
     // 最低价坐标点
     const lowPricePointX = sx
     // TODO 计算不对
-    const lowPricePointY = originY - lowPrice / priceAndHeightRate
+    const lowPricePointY = priceY(lowPrice)
 
     // 开盘价坐标点
     const openingPricePointX = sx
-    const openingPricePointY = originY - openingPrice / priceAndHeightRate
+    const openingPricePointY = priceY(openingPrice)
 
     // 收盘价坐标点
     const closingPicePointX = sx
-    const closingPicePointY = originY - closingPice / priceAndHeightRate
+    const closingPicePointY = priceY(closingPice)
 
     // 最高价坐标点
     const heightPricePointX = sx
-    const heightPricePointY = originY - heightPrice / priceAndHeightRate
+    const heightPricePointY = priceY(heightPrice)
 
     let color = ''
     // 蜡烛顶部坐标
@@ -314,11 +316,11 @@ if (canvas.getContext) {
 
       // 边界处理：在首尾加入虚拟点，不全第一个元素没有前控制点，末尾元素没有后控制点的情况
       if (i === 0) {
-        prevNode = { heightPrice: 100, lowPrice: 60, openingPrice: 70, closingPice: 99 }
+        prevNode = { heightPrice: priceY(100), lowPrice: priceY(60), openingPrice: priceY(70), closingPice: priceY(99) }
         nextNode = data[i + 1]
       } else if (i === xAxisTickCount - 1) {
         prevNode = data[i - 1]
-        nextNode = { heightPrice: 101, lowPrice: 20, openingPrice: 72, closingPice: 89 }
+        nextNode = { heightPrice: priceY(101), lowPrice: priceY(20), openingPrice: priceY(72), closingPice: priceY(89) }
       } else {
         prevNode = data[i - 1]
         nextNode = data[i + 1]
@@ -326,7 +328,7 @@ if (canvas.getContext) {
 
       // 最低价坐标点
       const lowPricePointX = xAxisTickStartX(i)
-      const lowPricePointY = xAxisTickStartPointY - lowPrice / priceAndHeightRate
+      const lowPricePointY = priceY(lowPrice)
 
       // 前后点构成的三角形
       // b: 三角形的高
