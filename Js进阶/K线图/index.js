@@ -1,16 +1,16 @@
 // javascript
 const canvas = document.getElementById('canvas');
-canvas.style.background = 'pink'
+// canvas.style.background = 'pink'
 
 // 最高价、最低价、开盘价、收盘价
 // 开盘价、收盘价处于最高价和最低价之间
 const data = [
-  { heightPrice: 110, lowPrice: 40, openingPrice: 80, closingPice: 100 },
+  { heightPrice: 100, lowPrice: 40, openingPrice: 80, closingPice: 100 },
   { heightPrice: 100, lowPrice: 30, openingPrice: 80, closingPice: 70 },
-  { heightPrice: 300, lowPrice: 50, openingPrice: 90, closingPice: 100 },
+  { heightPrice: 131, lowPrice: 100, openingPrice: 110, closingPice: 120 },
   { heightPrice: 95, lowPrice: 15, openingPrice: 51, closingPice: 93 },
   { heightPrice: 122, lowPrice: 20, openingPrice: 87, closingPice: 79 },
-  { heightPrice: 122, lowPrice: 53, openingPrice: 87, closingPice: 99 },
+  { heightPrice: 122, lowPrice: 63, openingPrice: 87, closingPice: 99 },
   { heightPrice: 122, lowPrice: 53, openingPrice: 87, closingPice: 99 },
   { heightPrice: 114, lowPrice: 40, openingPrice: 90, closingPice: 98 },
   { heightPrice: 94, lowPrice: 30, openingPrice: 51, closingPice: 83 },
@@ -22,7 +22,7 @@ if (canvas.getContext) {
 
   // 已知条件
   // 最高价最大的值
-  const maxHeightPrice = data.sort((a, b) => (b.heightPrice - a.heightPrice))[0].heightPrice
+  const maxHeightPrice = Math.max(...data.map(x => x.heightPrice))
   // 坐标轴与容器间的边距
   const space = 40
   // 容器宽度
@@ -41,7 +41,7 @@ if (canvas.getContext) {
   // const yAxisTickSpace = 20
   // y轴高度
   const yAxisHeight = height - space * 2
-  // 价格于y轴高度的比率
+  // 价格与y轴高度的比率
   const priceAndHeightRate = maxHeightPrice / yAxisHeight
   console.log('priceAndHeightRate: ', priceAndHeightRate);
 
@@ -67,8 +67,22 @@ if (canvas.getContext) {
   const xAxisVertexX = width - space
   // x轴顶点纵坐标
   const xAxisVertexY = height - space
+  // y轴价格纵坐标是否要伸缩
+  const isNeedFlex = priceAndHeightRate > 2
+  // y轴价格纵坐标伸缩比率
+  const flexRate = isNeedFlex ? priceAndHeightRate * 0.5 : priceAndHeightRate
   // 价格纵坐标
   const priceY = price => originY - price / priceAndHeightRate
+  // 曲线类型
+  const curveType = 'lowPrice'
+  // 数据纵坐标
+  const dataYAxisPoint = data.map(it => {
+    const newIt = {}
+    for (key in it) {
+      newIt[key] =  priceY(it[key])
+    }
+    return newIt
+  })
 
   // 1.2 绘制Y轴
   function renderYAxis () {
@@ -173,7 +187,11 @@ if (canvas.getContext) {
           ex = originX + tickWidth
           ey = xAxisTickStartPointY - yAxisTickSpace * i
 
-      renderText((yAxisTickSpace * i * priceAndHeightRate).toFixed(2), sx - 10, sy, 'right')
+      let text = (yAxisTickSpace * i * priceAndHeightRate).toFixed(2)
+      if (isNeedFlex) {
+        text = (yAxisTickSpace * i * priceAndHeightRate / flexRate).toFixed(2)
+      }
+      renderText(text, sx - 10, sy, 'right')
       renderLine(sx, sy, ex, ey)
     }
   }
@@ -192,143 +210,76 @@ if (canvas.getContext) {
   renderXAxisTick()
 
 
-  // TODO 优化
-  // 绘制所有蜡烛
+  // 绘制一串蜡烛
   for (let i = 0; i < xAxisTickCount; i++) {
-
-    const { heightPrice, lowPrice, openingPrice, closingPice } = data[i]
-
+    const { heightPrice, lowPrice, openingPrice, closingPice } = dataYAxisPoint[i]
     // 刻度横坐标
-    const sx = xAxisTickStartX(i)
-
-    // 最低价坐标点
-    const lowPricePointX = sx
-    // TODO 计算不对
-    const lowPricePointY = priceY(lowPrice)
-
-    // 开盘价坐标点
-    const openingPricePointX = sx
-    const openingPricePointY = priceY(openingPrice)
-
-    // 收盘价坐标点
-    const closingPicePointX = sx
-    const closingPicePointY = priceY(closingPice)
-
-    // 最高价坐标点
-    const heightPricePointX = sx
-    const heightPricePointY = priceY(heightPrice)
-
+    const xAxisTickX = xAxisTickStartX(i)
+    // 蜡烛一半宽度
+    const halfCandleW = candleW / 2
+    // 蜡烛颜色
     let color = ''
-    // 蜡烛顶部坐标
-    let candleTopPointX = ''
     let candleTopPointY = ''
-    // 蜡烛底部坐标
-    let candleBottomPointX = ''
     let candleBottomPointY = ''
-    // 红肿绿跌
-    if (closingPice > openingPrice) {
+
+    // 红涨绿跌
+    if (closingPice < openingPrice) {
       // 涨
       color = 'red'
-      candleTopPointX = closingPicePointX
-      candleTopPointY = closingPicePointY
-      candleBottomPointX = openingPricePointX
-      candleBottomPointY = openingPricePointY
+      candleTopPointY = closingPice
+      candleBottomPointY = openingPrice
     } else {
       color = 'green'
-      candleTopPointX = openingPricePointX
-      candleTopPointY = openingPricePointY
-      candleBottomPointX = closingPicePointX
-      candleBottomPointY = closingPicePointY
+      candleTopPointY = openingPrice
+      candleBottomPointY = closingPice
     }
-
-    console.warn('最低价坐标', lowPricePointX, lowPricePointY);
-    renderCandle(
-      candleTopPointX,
-      candleTopPointY,
-      candleBottomPointX,
-      candleBottomPointY,
-      lowPricePointX,
-      lowPricePointY,
-      heightPricePointX,
-      heightPricePointY,
-      color,
-      candleW
-    )
-  }
-
-  /**
-   * 绘制蜡烛
-   * @param {number} candleTopPointX 蜡烛顶点横坐标
-   * @param {number} candleTopPointY 蜡烛顶点纵坐标
-   * @param {number} candleBottomPointX 蜡烛底点横坐标
-   * @param {number} candleBottomPointY 蜡烛底点纵坐标
-   * @param {number} lowPricePointX 最低价横坐标
-   * @param {number} lowPricePointY 最低价纵坐标
-   * @param {number} heightPricePointX 最高价横坐标
-   * @param {number} heightPricePointY 最高价纵坐标
-   * @param {string} color 烛身颜色
-   * @param {number} candleW 蜡烛宽度
-   */
-  function renderCandle (
-    candleTopPointX,
-    candleTopPointY,
-    candleBottomPointX,
-    candleBottomPointY,
-    lowPricePointX,
-    lowPricePointY,
-    heightPricePointX,
-    heightPricePointY,
-    color,
-    candleW
-  ) {
-    const halfCandleW = candleW / 2
 
     // 绘制蜡烛下影线
     ctx.beginPath()
-    ctx.moveTo(lowPricePointX, lowPricePointY)
-    ctx.lineTo(candleBottomPointX, candleBottomPointY)
+    ctx.moveTo(xAxisTickX, lowPrice)
+    ctx.lineTo(xAxisTickX, candleBottomPointY)
     ctx.closePath();
     ctx.stroke()
 
     // 绘制蜡烛中间部分（绘制矩形）
     ctx.beginPath()
-    ctx.moveTo(candleTopPointX - halfCandleW, candleTopPointY)
-    ctx.rect(candleTopPointX - halfCandleW, candleTopPointY, candleW, candleBottomPointY - candleTopPointY)
+    ctx.moveTo(xAxisTickX - halfCandleW, candleTopPointY)
+    ctx.rect(xAxisTickX - halfCandleW, candleTopPointY, candleW, candleBottomPointY - candleTopPointY)
     ctx.fillStyle = color
     ctx.fill();
 
     // 绘制蜡烛上影线
     ctx.beginPath()
-    ctx.moveTo(candleTopPointX, candleTopPointY)
-    ctx.lineTo(heightPricePointX, heightPricePointY)
+    ctx.moveTo(xAxisTickX, candleTopPointY)
+    ctx.lineTo(xAxisTickX, heightPrice)
     ctx.closePath();
     ctx.stroke()
   }
 
-  // 获取当前点以及前后控制点坐标
+  /**
+   * 获取当前点以及前后控制点坐集合
+   * @returns [array] 当前点以及前后控制点坐集合
+   */
   const getControlPointInfo = () => {
     let controlPoint = []
 
     for (let i = 0; i < xAxisTickCount; i++) {
-      const { lowPrice } = data[i]
+      const pricePointX = xAxisTickStartX(i)
+      const pricePointY = dataYAxisPoint[i][curveType]
       let prevNode = {}
       let nextNode = {}
 
       // 边界处理：在首尾加入虚拟点，不全第一个元素没有前控制点，末尾元素没有后控制点的情况
       if (i === 0) {
         prevNode = { heightPrice: priceY(100), lowPrice: priceY(60), openingPrice: priceY(70), closingPice: priceY(99) }
-        nextNode = data[i + 1]
+        nextNode = dataYAxisPoint[i + 1]
       } else if (i === xAxisTickCount - 1) {
-        prevNode = data[i - 1]
+        prevNode = dataYAxisPoint[i - 1]
         nextNode = { heightPrice: priceY(101), lowPrice: priceY(20), openingPrice: priceY(72), closingPice: priceY(89) }
       } else {
-        prevNode = data[i - 1]
-        nextNode = data[i + 1]
+        prevNode = dataYAxisPoint[i - 1]
+        nextNode = dataYAxisPoint[i + 1]
       }
-
-      // 最低价坐标点
-      const lowPricePointX = xAxisTickStartX(i)
-      const lowPricePointY = priceY(lowPrice)
 
       // 前后点构成的三角形
       // b: 三角形的高
@@ -346,35 +297,27 @@ if (canvas.getContext) {
       // B: 控制点三角形的高
       const controlPointHeight = controlPointW * triangleHeight / triangleHypotenuse
 
-      // 前一个控制点坐标
-      let prevControlX = undefined
+      // 前一个控制点纵坐标
       let prevControlY = undefined
-      // 后一个控制点坐标
-      let nextControlX = undefined
+      // 后一个控制点纵坐标
       let nextControlY = undefined
-      // 如果下个控制点的最低价高于前个控制点的最低价
-      // TODO 计算逻辑需要整理、注释
-      if (nextNode.lowPrice < prevNode.lowPrice) {
-        // 左低右高
-        prevControlX = lowPricePointX - controlPointBottomLine / 2
-        prevControlY = lowPricePointY - controlPointHeight / 2
 
-        nextControlX = lowPricePointX + controlPointBottomLine / 2
-        nextControlY = lowPricePointY + controlPointHeight / 2
+      // 相对于canvas的坐标，如果前个控制点纵坐标小于下个控制点的纵坐标（相当于视觉上的左高右低）
+      if (prevNode[curveType] < nextNode[curveType]) {
+        // 左高右低
+        prevControlY = pricePointY - controlPointHeight / 2
+        nextControlY = pricePointY + controlPointHeight / 2
       } else {
-        prevControlX = lowPricePointX - controlPointBottomLine / 2
-        prevControlY = lowPricePointY + controlPointHeight / 2
-
-        nextControlX = lowPricePointX + controlPointBottomLine / 2
-        nextControlY = lowPricePointY - controlPointHeight / 2
+        prevControlY = pricePointY + controlPointHeight / 2
+        nextControlY = pricePointY - controlPointHeight / 2
       }
 
       controlPoint.push({
-        curX: lowPricePointX,
-        curY: lowPricePointY,
-        prevControlX,
+        curX: pricePointX,
+        curY: pricePointY,
+        prevControlX: pricePointX - controlPointBottomLine / 2,
         prevControlY,
-        nextControlX,
+        nextControlX: pricePointX + controlPointBottomLine / 2,
         nextControlY
        })
     }
@@ -414,13 +357,61 @@ if (canvas.getContext) {
 }
 
 // TODO
-// 1. 处理边界问题
-// 2. 数据整合成我们需要的ui数据
+// 1. 处理边界问题：以补全的方式、虚拟的点，让边界问题变成常规问题
+// 2. 数据整合：整合成我们需要的ui数据
 // 3. 封装
 // 原点不应该是0,0
 
 
-// 以补全的方式、虚拟的点，让边界减少
 // 以视图（折线）的方式验证结果（前后控制点）是否正确
 // 最高价发生变动时，y轴刻度文字、蜡烛和曲线需要响应变化
 //   刻度文字*倍率，（蜡烛和曲线）/倍率
+
+
+// 面向对象
+// 父类
+class Person {
+	constructor(sex, age) {
+  	this.sex = sex
+    this.age = age
+  }
+}
+
+// 子类
+class Student extends Person {
+	constructor(studentNumber, sex, age) {
+    super(sex, age)
+  	this.studentNumber = studentNumber
+
+    // 继承Person的属性
+    // this.sex = sex
+    // this.age = age
+  }
+}
+
+student1 = new Student('330311221', '男', 15)
+console.log('student1: ', student1);
+
+
+// 封装理念整理：
+// 1.先有场景，再封装，先有子类，再有父类
+// 2. 封装颗粒度：取决于场景的偏向性
+// 3。 封装偏向性：工具函数的独立性，结合场景分析
+
+
+// 代码待完善：
+// 1. 绘制一串蜡烛的函数
+// 2. 传入一个参数，可以绘制不同的曲线
+// 3. 起点价格的定位
+// 4. 实现辅助线，并思考“变和不变”上的优化点
+// 5. 实现拖拽功能，
+
+// const data = []
+// function renderFn (
+//   data,
+//   config = {
+//     candleBgColor: ''
+//   },
+// ) {
+
+// }
