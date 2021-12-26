@@ -19,13 +19,7 @@ const data = [
 if (canvas.getContext) {
   ctx = canvas.getContext('2d');
   renderKLineChart(data, {
-    yAxisSplitNumber: 4,
-    space: 60,
-    triangleH: 10,
-    tickWidth: 5,
-    xAxisTickSpace: 40,
-    candleW: 10,
-    curveType: 'lowPrice'
+    yAxisSplitNumber: 6,
   })
 }
 
@@ -36,24 +30,24 @@ if (canvas.getContext) {
  */
 function renderKLineChart (
   data,
-  config = {
+  {
     // y轴分段数量
-    yAxisSplitNumber: 4,
+    yAxisSplitNumber = 4,
     // 坐标轴与容器间的边距
-    space: 60,
+    space = 60,
     // 三角形高度
-    triangleH: 10,
+    triangleH = 10,
     // 刻度线宽度
-    tickWidth: 5,
+    tickWidth = 5,
     // x轴刻度间距
-    xAxisTickSpace: 40,
+    xAxisTickSpace = 40,
     // 蜡烛宽度
-    candleW: 10,
+    candleW = 10,
     // 曲线类型
-    curveType: 'lowPrice'
+    curveType = 'lowPrice'
   }
 ) {
-  const { yAxisSplitNumber, space, triangleH, tickWidth, xAxisTickSpace, candleW, curveType } = config
+
   // 已知条件
   // 容器宽度
   const width = ctx.canvas.width
