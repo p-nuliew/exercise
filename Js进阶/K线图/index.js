@@ -23,6 +23,43 @@ if (canvas.getContext) {
   })
 }
 
+
+/**
+ * 绘制蜡烛
+ * @param {number} abscissa 蜡烛横坐标
+ * @param {number} topPointY 最高点纵坐标
+ * @param {number} bottomPointY 最低点纵坐标
+ * @param {number} secondPointY 第二个点纵坐标
+ * @param {number} thirdPointY 第三个点纵坐标
+ * @param {number} candleW 蜡烛宽度
+ * @param {string} candleColor 蜡烛颜色
+ */
+ function renderCandle (abscissa, topPointY, bottomPointY, secondPointY, thirdPointY, candleW, candleColor) {
+  const halfCandleW = candleW / 2
+
+  // 绘制蜡烛上影线
+  ctx.beginPath()
+  ctx.moveTo(abscissa, topPointY)
+  ctx.lineTo(abscissa, secondPointY)
+  ctx.closePath();
+  ctx.stroke()
+
+  // 绘制蜡烛下影线
+  ctx.beginPath()
+  ctx.moveTo(abscissa, bottomPointY)
+  ctx.lineTo(abscissa, thirdPointY)
+  ctx.closePath();
+  ctx.stroke()
+
+  // 绘制蜡烛实体（矩形）
+  ctx.beginPath()
+  ctx.moveTo(abscissa - halfCandleW, secondPointY)
+  ctx.rect(abscissa - halfCandleW, secondPointY, candleW, thirdPointY - secondPointY)
+  ctx.fillStyle = candleColor
+  ctx.fill();
+}
+
+
 /**
  * 绘制k线图
  * @param {array} data 数据源
@@ -34,7 +71,7 @@ function renderKLineChart (
     // y轴分段数量
     yAxisSplitNumber = 4,
     // 坐标轴与容器间的边距
-    space = 60,
+    padding = 60,
     // 三角形高度
     triangleH = 10,
     // 刻度线宽度
@@ -58,19 +95,19 @@ function renderKLineChart (
 
   // 可知条件
   // 原点横坐标
-  const originX = space
+  const originX = padding
   // 原点纵坐标
-  const originY = height - space
+  const originY = height - padding
   // y轴顶点横坐标
-  const yAxisVertexX = space
+  const yAxisVertexX = padding
   // y轴顶点纵坐标
-  const yAxisVertexY = space
+  const yAxisVertexY = padding
   // x轴顶点横坐标
-  const xAxisVertexX = width - space
+  const xAxisVertexX = width - padding
   // x轴顶点纵坐标
-  const xAxisVertexY = height - space
+  const xAxisVertexY = height - padding
   // y轴高度
-  const yAxisHeight = height - space * 2
+  const yAxisHeight = height - padding * 2
   // y轴刻度间距
   const yAxisTickSpace = yAxisHeight / yAxisSplitNumber
   // 最高价最大的值
@@ -142,7 +179,7 @@ function renderKLineChart (
   }
 
   // 绘制一串蜡烛
-  renderCandles(data, candleW)
+  renderCandles(dataYAxisPoint, candleW)
 
   // 绘制贝塞尔曲线
   renderBezierCurve(getControlPointInfo(curveType))
@@ -165,65 +202,57 @@ function renderKLineChart (
 
   /**
    * 绘制一串蜡烛
-   * @param {array} data 数据源
+   * @param {array} dataYAxisPoint 数据源
    * @param {number} candleW 蜡烛宽度
    */
-  function renderCandles (data, candleW) {
-    // 将数据转换为在canvas坐标系中的点
-    const dataYAxisPoint = data.map(it => {
-      const newIt = {}
-      for (key in it) {
-        newIt[key] =  tranPriceToOrdinate(it[key])
-      }
-      return newIt
-    })
-    // 蜡烛数量
-    const candleLength = data.length
-    // 蜡烛一半宽度
+  function renderCandles (dataYAxisPoint, candleW) {
     const halfCandleW = candleW / 2
 
-    for (let i = 0; i < candleLength; i++) {
-      // 刻度横坐标
-      const xAxisTickX = xAxisTickPointX(i)
-      // 蜡烛颜色
-      let color = ''
-      let candleTopPointY = ''
-      let candleBottomPointY = ''
-
+    for (let i = 0, candleLength = dataYAxisPoint.length; i < candleLength; i++) {
       const { heightPrice, lowPrice, openingPrice, closingPice } = dataYAxisPoint[i]
+      let
+        abscissa = xAxisTickPointX(i),
+        topPointY = heightPrice,
+        bottomPointY = lowPrice,
+        secondPointY,
+        thirdPointY,
+        candleColor
 
-      // 红涨绿跌
       if (closingPice < openingPrice) {
         // 涨
-        color = 'red'
-        candleTopPointY = closingPice
-        candleBottomPointY = openingPrice
+        candleColor = 'red'
+        secondPointY = closingPice
+        thirdPointY = openingPrice
       } else {
-        color = 'green'
-        candleTopPointY = openingPrice
-        candleBottomPointY = closingPice
+        candleColor = 'green'
+        secondPointY = openingPrice
+        thirdPointY = closingPice
       }
-
-      // 绘制蜡烛下影线
-      ctx.beginPath()
-      ctx.moveTo(xAxisTickX, lowPrice)
-      ctx.lineTo(xAxisTickX, candleBottomPointY)
-      ctx.closePath();
-      ctx.stroke()
-
-      // 绘制蜡烛中间部分（绘制矩形）
-      ctx.beginPath()
-      ctx.moveTo(xAxisTickX - halfCandleW, candleTopPointY)
-      ctx.rect(xAxisTickX - halfCandleW, candleTopPointY, candleW, candleBottomPointY - candleTopPointY)
-      ctx.fillStyle = color
-      ctx.fill();
 
       // 绘制蜡烛上影线
       ctx.beginPath()
-      ctx.moveTo(xAxisTickX, candleTopPointY)
-      ctx.lineTo(xAxisTickX, heightPrice)
+      ctx.moveTo(abscissa, topPointY)
+      ctx.lineTo(abscissa, secondPointY)
       ctx.closePath();
       ctx.stroke()
+
+      // 绘制蜡烛下影线
+      ctx.beginPath()
+      ctx.moveTo(abscissa, bottomPointY)
+      ctx.lineTo(abscissa, thirdPointY)
+      ctx.closePath();
+      ctx.stroke()
+
+      // 绘制蜡烛实体（绘制矩形）
+      ctx.beginPath()
+      ctx.moveTo(abscissa - halfCandleW, secondPointY)
+      ctx.rect(abscissa - halfCandleW, secondPointY, candleW, thirdPointY - secondPointY)
+      ctx.fillStyle = candleColor
+      ctx.fill();
+
+      // TODO 因为没有绘制单个蜡烛的场景，所以没必要封装（偏应用），以一串蜡烛为颗粒这样使用更为方便
+      // 如果我们做的是类似图表库项目，就可以考虑封装为一个工具函数，在多个地方使用，提高复用率
+      // renderCandle(abscissa, topPointY, bottomPointY, secondPointY, thirdPointY, candleW, candleColor)
     }
   }
 
@@ -352,3 +381,6 @@ function renderKLineChart (
     ctx.fillText(text, x, y)  // 描绘实体文字
   }
 }
+
+// TODO 怎样定义内部
+// 如果一个函数或者组件内部的某段逻辑出现了好几次，我们可以将它封装成函数，执行函数时不需要通过参数传入，可以利用闭包的特性在封装函数内部直接访问外部变量。

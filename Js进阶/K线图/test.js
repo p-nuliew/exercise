@@ -26,10 +26,10 @@
   ctx.closePath();
   ctx.stroke()
 
-  // 绘制蜡烛中间部分（绘制矩形）
+  // 绘制蜡烛实体（绘制矩形）
   ctx.beginPath()
   ctx.moveTo(abscissa - halfCandleW, secondPointY)
-  ctx.rect(abscissa - halfCandleW, secondPointY, candleW, secondPointY - thirdPointY)
+  ctx.rect(abscissa - halfCandleW, secondPointY, candleW, thirdPointY - secondPointY)
   ctx.fillStyle = candleColor
   ctx.fill();
 }
