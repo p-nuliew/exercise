@@ -136,14 +136,14 @@ function renderKLineChart (
         ex = originX + tickWidth
         ey = originY - yAxisTickSpace * i
 
-    renderText(ctx, yAxisTickText(i), sx - 10, sy, 'right')
+    renderText(ctx, sx - 10, sy, yAxisTickText(i), 'right', '#FF0000')
     renderLine(sx, sy, ex, ey)
   }
 
   // 绘制x轴刻度
   for (let i = 0; i < xAxisTickCount; i++) {
     const xAxisTickX = xAxisTickPointX(i)
-    renderText(ctx, i, xAxisTickX, originY + tickWidth + 10, 'center')
+    renderText(ctx, xAxisTickX, originY + tickWidth + 10, i, 'center', '#FF0000')
     renderLine(xAxisTickX, originY, xAxisTickX, originY + tickWidth)
   }
 
@@ -337,15 +337,18 @@ function renderKLineChart (
   /**
    * 轴线文字
    * @param {object} context canvas上下文
-   * @param {string} text 文本
    * @param {number} x 横坐标
    * @param {number} y 纵坐标
-   * @param {string} textAlign 文本对齐方式
+   * @param {string} text 文本
+   * @param {string} align 文本对齐方式
+   * @param {string} color 文本颜色
    */
-  function renderText (context = ctx, text, x, y, textAlign = 'left') {
-    context.fillStyle = "#FF0000";  // 文字颜色
+  // TODO 把参数放在对象下传入是不是更方便？
+  function renderText (context = ctx, x, y, text, align = 'left', color = '#FFF') {
+    // context.fillStyle = "#FF0000";  // 文字颜色
+    context.fillStyle = color;  // 文字颜色
     context.textBaseline = "middle";
-    context.textAlign = textAlign;
+    context.textAlign = align;
 
     context.font = "10px Arial";  // 高为10px的字体
     context.fillText(text, x, y)  // 描绘实体文字
@@ -393,8 +396,18 @@ function renderKLineChart (
     ctx.lineTo(offsetX, height - padding);
     ctx.stroke();
 
+
+    const tipBoxWidth = 60
+    const tipBoxHeight = 20
+
+    // 绘制y轴tip文字背景框
+    ctx.beginPath();
+    ctx.rect(0, offsetY - tipBoxHeight / 2, tipBoxWidth, tipBoxHeight);
+    ctx.fillStyle = '#999'
+    ctx.fill();
+
     // 绘制y轴tip文字
-    renderText(ctx, tranOffsetYToYAxisValue(offsetY), originX - 30, offsetY, 'left')
+    renderText(ctx, originX - 30, offsetY, tranOffsetYToYAxisValue(offsetY), 'left', '#fff')
   }, false)
 
   // 监听鼠标离开事件并清除画布
@@ -415,7 +428,7 @@ function renderKLineChart (
   }
 
   function tranOffsetYToYAxisValue (OffsetY) {
-    return (yAxisHeight + padding - OffsetY) / yAxisHeight * maxPrice
+    return ((yAxisHeight + padding - OffsetY) / yAxisHeight * maxPrice).toFixed(2)
   }
 }
 }
