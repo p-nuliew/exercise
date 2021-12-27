@@ -1,4 +1,3 @@
-
 /**
  * 绘制蜡烛
  * @param {number} abscissa 蜡烛横坐标
@@ -26,12 +25,10 @@
   ctx.closePath();
   ctx.stroke()
 
-  // 绘制蜡烛实体（绘制矩形）
+  // 绘制蜡烛实体（矩形）
   ctx.beginPath()
   ctx.moveTo(abscissa - halfCandleW, secondPointY)
   ctx.rect(abscissa - halfCandleW, secondPointY, candleW, thirdPointY - secondPointY)
   ctx.fillStyle = candleColor
   ctx.fill();
 }
-
-renderCandle(50, 88, 50, 44, 33, 20, 'red')
