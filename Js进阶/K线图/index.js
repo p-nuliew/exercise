@@ -18,19 +18,20 @@ const data = [
 
 if (canvas.getContext) {
   ctx = canvas.getContext('2d');
-  renderKLineChart(data, {
+  const config = {
     yAxisSplitNumber: 6,
-  })
+  }
+  renderKLineChart(data, config, true)
 }
-
 
 /**
  * 绘制k线图
  * @param {array} data 数据源
- * @param {config} config k线图配置项
+ * @param {object} config k线图配置项
+ * @param {boolean} showTips 是否展示辅助线
  */
 function renderKLineChart (
-  data,
+  data = [],
   {
     // y轴分段数量
     yAxisSplitNumber = 4,
@@ -46,7 +47,8 @@ function renderKLineChart (
     candleW = 10,
     // 曲线类型
     curveType = 'lowPrice'
-  }
+  },
+  showTips = false
 ) {
 
   // 已知条件
@@ -95,6 +97,9 @@ function renderKLineChart (
   // 不知道哪里计算错误
   // const tranPriceToOrdinate = price => originY - price / yAxisPriceRate + (price - minPrice) / yAxisPriceRate
 
+  if (showTips) {
+    renderTipCanvas()
+  }
 
   // 绘制Y轴
   ctx.beginPath()
@@ -131,14 +136,14 @@ function renderKLineChart (
         ex = originX + tickWidth
         ey = originY - yAxisTickSpace * i
 
-    renderText(yAxisTickText(i), sx - 10, sy, 'right')
+    renderText(ctx, yAxisTickText(i), sx - 10, sy, 'right')
     renderLine(sx, sy, ex, ey)
   }
 
   // 绘制x轴刻度
   for (let i = 0; i < xAxisTickCount; i++) {
     const xAxisTickX = xAxisTickPointX(i)
-    renderText(i, xAxisTickX, originY + tickWidth + 10, 'center')
+    renderText(ctx, i, xAxisTickX, originY + tickWidth + 10, 'center')
     renderLine(xAxisTickX, originY, xAxisTickX, originY + tickWidth)
   }
 
@@ -331,20 +336,93 @@ function renderKLineChart (
 
   /**
    * 轴线文字
+   * @param {object} context canvas上下文
    * @param {string} text 文本
    * @param {number} x 横坐标
    * @param {number} y 纵坐标
    * @param {string} textAlign 文本对齐方式
    */
-  function renderText (text, x, y, textAlign) {
-    ctx.fillStyle = "#FF0000";  // 文字颜色
-    ctx.textBaseline = "middle";
-    ctx.textAlign = textAlign;
+  function renderText (context = ctx, text, x, y, textAlign = 'left') {
+    context.fillStyle = "#FF0000";  // 文字颜色
+    context.textBaseline = "middle";
+    context.textAlign = textAlign;
 
-    ctx.font = "10px Arial";  // 高为10px的字体
-    ctx.fillText(text, x, y)  // 描绘实体文字
+    context.font = "10px Arial";  // 高为10px的字体
+    context.fillText(text, x, y)  // 描绘实体文字
+  }
+
+  /**
+ * 绘制辅助线画布
+ */
+ function renderTipCanvas () {
+  const tipCanvas = document.getElementById('subCanvas');
+  // tipCanvas.style.background = 'green'
+
+  if (!tipCanvas.getContext) return
+
+  const ctx = tipCanvas.getContext('2d');
+
+
+  // 已知条件
+  // 容器宽度
+  const width = ctx.canvas.width
+  // 容器高度
+  const height = ctx.canvas.height
+
+
+  // 监听鼠标移动事件并绘制辅助线
+  tipCanvas.addEventListener('mousemove', function (e) {
+    const { offsetX, offsetY } = e
+    // 清除画布
+    ctx.clearRect(0, 0, width, height)
+
+    if (!isContentArea(e)) return
+    console.log('e: ', e);
+
+    // 绘制水平辅助线
+    ctx.beginPath();
+    ctx.setLineDash([4, 4]);
+    ctx.moveTo(padding, offsetY);
+    ctx.lineTo(width - padding, offsetY);
+    ctx.stroke();
+
+    // 绘制垂直辅助线
+    ctx.beginPath();
+    ctx.setLineDash([4, 4]);
+    ctx.moveTo(offsetX, padding);
+    ctx.lineTo(offsetX, height - padding);
+    ctx.stroke();
+
+    // 绘制y轴tip文字
+    renderText(ctx, tranOffsetYToYAxisValue(offsetY), originX - 30, offsetY, 'left')
+  }, false)
+
+  // 监听鼠标离开事件并清除画布
+  tipCanvas.addEventListener('mouseleave', function (e) {
+    if (!isContentArea(e)) return
+    console.log('清除');
+    ctx.clearRect(0, 0, width, height)
+  }, false)
+
+  // k线图内容区域
+  function isContentArea (e) {
+    const { offsetX, offsetY } = e
+
+    return  offsetX > padding &&
+            offsetX < width - padding &&
+            offsetY > padding &&
+            offsetY < height - padding
+  }
+
+  function tranOffsetYToYAxisValue (OffsetY) {
+    return (yAxisHeight + padding - OffsetY) / yAxisHeight * maxPrice
   }
 }
+}
+
+
+
+
 
 // TODO 怎样定义内部
 // 如果一个函数或者组件内部的某段逻辑出现了好几次，我们可以将它封装成函数，执行函数时不需要通过参数传入，可以利用闭包的特性在封装函数内部直接访问外部变量。
