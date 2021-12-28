@@ -363,19 +363,31 @@ function renderKLineChart (
  */
  function renderTipCanvas () {
   const tipCanvas = document.getElementById('subCanvas');
-  // tipCanvas.style.background = 'green'
-
   if (!tipCanvas.getContext) return
-
   const ctx = tipCanvas.getContext('2d');
 
-
-  // 已知条件
   // 容器宽度
   const width = ctx.canvas.width
   // 容器高度
   const height = ctx.canvas.height
+  // 提示框元素
+  let promptBoxEl = null
+  // 提示框元素宽度
+  let promptBoxElWidth = 100
+  // 提示框内的日期元素
+  let tipDateEl = null
+  // 提示框内的最高价元素
+  let heightPriceEl = null
+  // 提示框内的最低价元素
+  let lowPriceEl = null
+  // x轴y轴上的提示框宽、高
+  const xyAxisTipBoxWidth = padding.left
+  const xyAxisTipBoxHeight = 20
 
+  // 监听鼠标进入事件并清除画布
+  tipCanvas.addEventListener('mouseenter', function (e) {
+    promptBoxEl = document.getElementById('tipInfo')
+  }, false)
 
   // 监听鼠标移动事件并绘制辅助线
   tipCanvas.addEventListener('mousemove', function (e) {
@@ -399,13 +411,9 @@ function renderKLineChart (
     ctx.lineTo(offsetX, yAxisPointY);
     ctx.stroke();
 
-
-    const tipBoxWidth = padding.left
-    const tipBoxHeight = 20
-
     // 绘制y轴tip文字背景框
     ctx.beginPath();
-    ctx.rect(0, offsetY - tipBoxHeight / 2, tipBoxWidth, tipBoxHeight);
+    ctx.rect(0, offsetY - xyAxisTipBoxHeight / 2, xyAxisTipBoxWidth, xyAxisTipBoxHeight);
     ctx.fillStyle = '#999'
     ctx.fill();
 
@@ -416,20 +424,47 @@ function renderKLineChart (
 
     // 绘制x轴tip文字背景框
     ctx.beginPath();
-    ctx.rect(offsetX - tipBoxWidth / 2, yAxisPointY, tipBoxWidth, tipBoxHeight);
+    ctx.rect(offsetX - xyAxisTipBoxWidth / 2, yAxisPointY, xyAxisTipBoxWidth, xyAxisTipBoxHeight);
     ctx.fillStyle = '#999'
     ctx.fill();
 
     // 绘制x轴tip文字
     const xTipIndex = Math.round((offsetX - yAxisPointX) / xAxisWidth* xAxisItemLength)
-    renderText(ctx, offsetX, yAxisPointY + tipBoxHeight / 2, seriesData[xTipIndex] || '', 'center', '#fff')
+    renderText(ctx, offsetX, yAxisPointY + xyAxisTipBoxHeight / 2, seriesData[xTipIndex] || '', 'center', '#fff')
+
+    // 设置提示框元素的样式和内容
+    const { date, heightPrice, lowPrice } = data[xTipIndex]
+    // 如果有子元素，说明已经插入，避免重复获取元素
+    if (tipDateEl) {
+      tipDateEl.innerText = date
+      heightPriceEl.innerText = `最高价：${heightPrice}`
+      lowPriceEl.innerText = `最低价：${lowPrice}`
+      if (xTipIndex > xAxisItemLength / 2) {
+        promptBoxEl.style.left = padding.left + xAxisWidth - promptBoxElWidth + 'px'
+      } else {
+        promptBoxEl.style.width = promptBoxElWidth + 'px'
+        promptBoxEl.style.left = padding.left + 'px'
+      }
+    } else {
+      promptBoxEl.style.display = 'block'
+      tipDateEl = document.getElementById('tipDate')
+      heightPriceEl = document.getElementById('heightPrice')
+      lowPriceEl = document.getElementById('lowPrice')
+    }
   }, false)
 
   // 监听鼠标离开事件并清除画布
   tipCanvas.addEventListener('mouseleave', function (e) {
     if (!isContentArea(e)) return
     console.log('清除');
+
+    promptBoxEl.style.display = 'none'
     ctx.clearRect(0, 0, width, height)
+    // 释放内存
+    promptBoxEl = null
+    tipDateEl = null
+    heightPriceEl = null
+    lowPriceEl = null
   }, false)
 
   // k线图内容区域

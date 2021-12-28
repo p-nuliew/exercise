@@ -10,6 +10,20 @@
       margin: 0;
       padding: 0;
     }
+    #tipInfo {
+      position: absolute;
+      z-index: 52;
+      padding: 2px;
+      width: 100px;
+      line-height: 16px;
+      font-size: 12px;
+      left: 50px;
+      top: 30px;
+      background-color: rgba(255, 255, 255, 0.9);
+      color: rgb(0, 0, 0);
+      border: 1px solid rgb(0, 0, 0);
+      display: none;
+    }
 
   </style>
 </head>
@@ -17,13 +31,11 @@
   <div style="position: relative;">
     <canvas id="canvas" width="500" height="300"></canvas>
     <canvas id="subCanvas" width="500" height="300" style="position: absolute; left: 0; top: 0;"></canvas>
-    <!-- <div>
-      <div>2012-09-09</div>
-      <div>最高价：</div>
-      <div>2012-09-09</div>
-      <div>2012-09-09</div>
-      <div>2012-09-09</div>
-    </div> -->
+    <div id="tipInfo">
+      <div id="tipDate">09-09</div>
+      <div id="heightPrice"></div>
+      <div id="lowPrice"></div>
+    </div>
   </div>
 
   <script src="./index.js"></script>
