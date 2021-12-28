@@ -46,8 +46,6 @@ function renderKLineChart (
     triangleH = 10,
     // 刻度线宽度
     tickWidth = 5,
-    // x轴刻度间距
-    xAxisTickSpace = 40,
     // 蜡烛宽度
     candleW = 10,
     // 曲线类型
@@ -61,29 +59,28 @@ function renderKLineChart (
   const width = ctx.canvas.width
   // 容器高度
   const height = ctx.canvas.height
-  // x轴刻度数量
-  const xAxisTickCount = data.length
+  // x轴元素数量
+  const xAxisItemLength = data.length
 
   // 可知条件
-  // 原点横坐标
-  const originX = padding.left
-  // 原点纵坐标
-  const originY = height - padding.bottom
-  // y轴顶点横坐标
-  const yAxisVertexX = padding.left
+  // y轴横坐标
+  const yAxisPointX = padding.left
+  // y轴纵坐标
+  const yAxisPointY = height - padding.bottom
   // y轴顶点纵坐标
   const yAxisVertexY = padding.top
-  // x轴顶点横坐标
-  const xAxisVertexX = width - padding.left
-  // x轴顶点纵坐标
-  const xAxisVertexY = height - padding.bottom
   // y轴高度
   const yAxisHeight = height - (padding.top + padding.bottom)
   // y轴刻度间距
   const yAxisTickSpace = yAxisHeight / yAxisSplitNumber
-  // 最高价最大的值
+  // x轴顶点横坐标
+  const xAxisVertexX = width - yAxisPointX
+  // x轴宽度
+  const xAxisWidth = width - yAxisPointX - padding.right
+  // x轴刻度间距
+  const xAxisTickSpace = xAxisWidth/ xAxisItemLength
+   // 最高价最大的值
   const maxPrice = Math.max(...data.map(x => x.heightPrice))
-
   // 价格与y轴高度的比率
   const yAxisPriceRate = maxPrice / yAxisHeight
   // 纵坐标集合
@@ -102,7 +99,7 @@ function renderKLineChart (
   // const splitBase = (maxPrice - minPrice) / yAxisSplitNumber
   // const yAxisTickText = i => (minPrice + splitBase * i).toFixed(2)
   // 不知道哪里计算错误
-  // const tranPriceToOrdinate = price => originY - price / yAxisPriceRate + (price - minPrice) / yAxisPriceRate
+  // const tranPriceToOrdinate = price => yAxisPointY - price / yAxisPriceRate + (price - minPrice) / yAxisPriceRate
 
   if (showTips) {
     renderTipCanvas()
@@ -110,48 +107,48 @@ function renderKLineChart (
 
   // 绘制Y轴
   ctx.beginPath()
-  ctx.moveTo(originX, originY)
-  ctx.lineTo(yAxisVertexX, yAxisVertexY)
+  ctx.moveTo(yAxisPointX, yAxisPointY)
+  ctx.lineTo(yAxisPointX, yAxisVertexY)
   ctx.closePath();
   ctx.stroke()
 
   // 绘制x轴
   ctx.beginPath()
-  ctx.moveTo(originX, originY)
-  ctx.lineTo(xAxisVertexX, xAxisVertexY)
+  ctx.moveTo(yAxisPointX, yAxisPointY)
+  ctx.lineTo(xAxisVertexX, yAxisPointY)
   ctx.closePath();
   ctx.stroke()
 
   // 绘制y轴三角形
   ctx.beginPath()
-  ctx.moveTo(yAxisVertexX, yAxisVertexY)
-  ctx.lineTo(yAxisVertexX - triangleH/2, yAxisVertexY + triangleH)
-  ctx.lineTo(yAxisVertexX + triangleH/2, yAxisVertexY + triangleH)
+  ctx.moveTo(yAxisPointX, yAxisVertexY)
+  ctx.lineTo(yAxisPointX - triangleH/2, yAxisVertexY + triangleH)
+  ctx.lineTo(yAxisPointX + triangleH/2, yAxisVertexY + triangleH)
   ctx.fill()
 
   // 绘制x轴三角形
   ctx.beginPath()
-  ctx.moveTo(xAxisVertexX, xAxisVertexY)
-  ctx.lineTo(xAxisVertexX - triangleH, xAxisVertexY - triangleH/2)
-  ctx.lineTo(xAxisVertexX - triangleH, xAxisVertexY + triangleH/2)
+  ctx.moveTo(xAxisVertexX, yAxisPointY)
+  ctx.lineTo(xAxisVertexX - triangleH, yAxisPointY - triangleH/2)
+  ctx.lineTo(xAxisVertexX - triangleH, yAxisPointY + triangleH/2)
   ctx.fill()
 
   // 绘制y轴刻度
   for (let i = 0; i < yAxisSplitNumber; i++) {
-    let sx = originX
-        sy = originY - yAxisTickSpace * i
-        ex = originX + tickWidth
-        ey = originY - yAxisTickSpace * i
+    let sx = yAxisPointX
+        sy = yAxisPointY - yAxisTickSpace * i
+        ex = yAxisPointX + tickWidth
+        ey = yAxisPointY - yAxisTickSpace * i
 
     renderText(ctx, sx - 10, sy, yAxisTickText(i), 'right', '#FF0000')
     renderLine(sx, sy, ex, ey)
   }
 
   // 绘制x轴刻度
-  for (let i = 0; i < xAxisTickCount; i++) {
+  for (let i = 0; i < xAxisItemLength; i++) {
     const xAxisTickX = xAxisTickPointX(i)
-    renderText(ctx, xAxisTickX, originY + tickWidth + 10, seriesData[i], 'center', '#FF0000')
-    renderLine(xAxisTickX, originY, xAxisTickX, originY + tickWidth)
+    renderText(ctx, xAxisTickX, yAxisPointY + tickWidth + 10, seriesData[i], 'center', '#FF0000')
+    renderLine(xAxisTickX, yAxisPointY, xAxisTickX, yAxisPointY + tickWidth)
   }
 
   // 绘制一串蜡烛
@@ -163,12 +160,12 @@ function renderKLineChart (
 
   // x轴刻度横坐标
   function xAxisTickPointX (i) {
-    return originX + i * xAxisTickSpace
+    return yAxisPointX + i * xAxisTickSpace
   }
 
   // 实际价格转为纵坐标
   function tranPriceToOrdinate (price) {
-    return originY - price / yAxisPriceRate
+    return yAxisPointY - price / yAxisPriceRate
   }
 
   // Y轴刻度文字
@@ -240,7 +237,7 @@ function renderKLineChart (
   function getControlPointInfo (curveType) {
     let controlPoint = []
 
-    for (let i = 0; i < xAxisTickCount; i++) {
+    for (let i = 0; i < xAxisItemLength; i++) {
       const pricePointX = xAxisTickPointX(i)
       const pricePointY = dataYAxisPoint[i][curveType]
       let prevNode = {}
@@ -250,7 +247,7 @@ function renderKLineChart (
       if (i === 0) {
         prevNode = { heightPrice: tranPriceToOrdinate(100), lowPrice: tranPriceToOrdinate(60), openingPrice: tranPriceToOrdinate(70), closingPice: tranPriceToOrdinate(99) }
         nextNode = dataYAxisPoint[i + 1]
-      } else if (i === xAxisTickCount - 1) {
+      } else if (i === xAxisItemLength - 1) {
         prevNode = dataYAxisPoint[i - 1]
         nextNode = { heightPrice: tranPriceToOrdinate(101), lowPrice: tranPriceToOrdinate(20), openingPrice: tranPriceToOrdinate(72), closingPice: tranPriceToOrdinate(89) }
       } else {
@@ -387,12 +384,11 @@ function renderKLineChart (
     ctx.clearRect(0, 0, width, height)
 
     if (!isContentArea(e)) return
-    console.log('e: ', e);
 
     // 绘制水平辅助线
     ctx.beginPath();
     ctx.setLineDash([4, 4]);
-    ctx.moveTo(padding.left, offsetY);
+    ctx.moveTo(yAxisPointX, offsetY);
     ctx.lineTo(width - padding.right, offsetY);
     ctx.stroke();
 
@@ -400,11 +396,11 @@ function renderKLineChart (
     ctx.beginPath();
     ctx.setLineDash([4, 4]);
     ctx.moveTo(offsetX, padding.top);
-    ctx.lineTo(offsetX, height - padding.bottom);
+    ctx.lineTo(offsetX, yAxisPointY);
     ctx.stroke();
 
 
-    const tipBoxWidth = 60
+    const tipBoxWidth = padding.left
     const tipBoxHeight = 20
 
     // 绘制y轴tip文字背景框
@@ -414,22 +410,19 @@ function renderKLineChart (
     ctx.fill();
 
     // 绘制y轴tip文字
-    renderText(ctx, originX - 30, offsetY, tranOffsetYToYAxisValue(offsetY), 'left', '#fff')
+    const yAxisValue = ((yAxisHeight + padding.top - offsetY) / yAxisHeight * maxPrice).toFixed(2)
+    renderText(ctx, yAxisPointX - 30, offsetY, yAxisValue, 'left', '#fff')
 
 
     // 绘制x轴tip文字背景框
     ctx.beginPath();
-    ctx.rect(offsetX - tipBoxWidth / 2, originY, tipBoxWidth, tipBoxHeight);
+    ctx.rect(offsetX - tipBoxWidth / 2, yAxisPointY, tipBoxWidth, tipBoxHeight);
     ctx.fillStyle = '#999'
     ctx.fill();
 
     // 绘制x轴tip文字
-    // TODO 文字
-    // 当前横坐标在x轴上
-    const i = Math.round((offsetX - padding.left) / (width - padding.left - padding.right) * 10)
-
-    console.log('i: ', i);
-    renderText(ctx, offsetX, originY + tipBoxHeight / 2, 1, 'left', '#fff')
+    const xTipIndex = Math.round((offsetX - yAxisPointX) / xAxisWidth* xAxisItemLength)
+    renderText(ctx, offsetX, yAxisPointY + tipBoxHeight / 2, seriesData[xTipIndex] || '', 'center', '#fff')
   }, false)
 
   // 监听鼠标离开事件并清除画布
@@ -443,15 +436,12 @@ function renderKLineChart (
   function isContentArea (e) {
     const { offsetX, offsetY } = e
 
-    return  offsetX > padding.left &&
-            offsetX < width - padding.right &&
+    return  offsetX > yAxisPointX &&
+            offsetX < width - padding.right - xAxisWidth / xAxisItemLength &&
             offsetY > padding.top &&
-            offsetY < height - padding.bottom
+            offsetY < yAxisPointY
   }
 
-  function tranOffsetYToYAxisValue (OffsetY) {
-    return ((yAxisHeight + padding.top - OffsetY) / yAxisHeight * maxPrice).toFixed(2)
-  }
 }
 }
 
