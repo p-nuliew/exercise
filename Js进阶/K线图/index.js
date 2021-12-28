@@ -1,19 +1,19 @@
 // javascript
 const canvas = document.getElementById('canvas');
-canvas.style.background = 'pink'
+canvas.style.background = '#e8e8e8'
 
 // 最高价、最低价、开盘价、收盘价
 const data = [
-  { heightPrice: 1000, lowPrice: 500, openingPrice: 800, closingPice: 900 },
-  { heightPrice: 1000, lowPrice: 625, openingPrice: 800, closingPice: 700 },
-  { heightPrice: 1000, lowPrice: 750, openingPrice: 800, closingPice: 900 },
-  { heightPrice: 905, lowPrice: 625, openingPrice: 701, closingPice: 903 },
-  { heightPrice: 1000, lowPrice: 550, openingPrice: 807, closingPice: 709 },
-  { heightPrice: 1000, lowPrice: 800, openingPrice: 807, closingPice: 909 },
-  { heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
-  { heightPrice: 1000, lowPrice: 600, openingPrice: 900, closingPice: 908 },
-  { heightPrice: 904, lowPrice: 600, openingPrice: 701, closingPice: 803 },
-  { heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
+  { date: '09-01', heightPrice: 1000, lowPrice: 500, openingPrice: 800, closingPice: 900 },
+  { date: '09-02', heightPrice: 1000, lowPrice: 625, openingPrice: 800, closingPice: 700 },
+  { date: '09-03', heightPrice: 1000, lowPrice: 750, openingPrice: 800, closingPice: 900 },
+  { date: '09-04', heightPrice: 905, lowPrice: 625, openingPrice: 701, closingPice: 903 },
+  { date: '09-05', heightPrice: 1000, lowPrice: 550, openingPrice: 807, closingPice: 709 },
+  { date: '09-06', heightPrice: 1000, lowPrice: 800, openingPrice: 807, closingPice: 909 },
+  { date: '09-07', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
+  { date: '09-08', heightPrice: 1000, lowPrice: 600, openingPrice: 900, closingPice: 908 },
+  { date: '09-09', heightPrice: 904, lowPrice: 600, openingPrice: 701, closingPice: 803 },
+  { date: '09-10', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
 ]
 
 if (canvas.getContext) {
@@ -36,7 +36,12 @@ function renderKLineChart (
     // y轴分段数量
     yAxisSplitNumber = 4,
     // 坐标轴与容器间的边距
-    padding = 60,
+    padding = {
+      left: 50,
+      right: 50,
+      top: 30,
+      bottom: 30
+    },
     // 三角形高度
     triangleH = 10,
     // 刻度线宽度
@@ -46,7 +51,7 @@ function renderKLineChart (
     // 蜡烛宽度
     candleW = 10,
     // 曲线类型
-    curveType = 'lowPrice'
+    curveType = 'lowPrice',
   },
   showTips = false
 ) {
@@ -61,19 +66,19 @@ function renderKLineChart (
 
   // 可知条件
   // 原点横坐标
-  const originX = padding
+  const originX = padding.left
   // 原点纵坐标
-  const originY = height - padding
+  const originY = height - padding.bottom
   // y轴顶点横坐标
-  const yAxisVertexX = padding
+  const yAxisVertexX = padding.left
   // y轴顶点纵坐标
-  const yAxisVertexY = padding
+  const yAxisVertexY = padding.top
   // x轴顶点横坐标
-  const xAxisVertexX = width - padding
+  const xAxisVertexX = width - padding.left
   // x轴顶点纵坐标
-  const xAxisVertexY = height - padding
+  const xAxisVertexY = height - padding.bottom
   // y轴高度
-  const yAxisHeight = height - padding * 2
+  const yAxisHeight = height - (padding.top + padding.bottom)
   // y轴刻度间距
   const yAxisTickSpace = yAxisHeight / yAxisSplitNumber
   // 最高价最大的值
@@ -89,6 +94,8 @@ function renderKLineChart (
     }
     return newIt
   })
+
+  const seriesData = data.map(it => it.date)
 
   // TODO Y轴刻度和纵坐标优化
   // const minPrice = Math.min(...data.map(x => x.lowPrice))
@@ -143,7 +150,7 @@ function renderKLineChart (
   // 绘制x轴刻度
   for (let i = 0; i < xAxisTickCount; i++) {
     const xAxisTickX = xAxisTickPointX(i)
-    renderText(ctx, xAxisTickX, originY + tickWidth + 10, i, 'center', '#FF0000')
+    renderText(ctx, xAxisTickX, originY + tickWidth + 10, seriesData[i], 'center', '#FF0000')
     renderLine(xAxisTickX, originY, xAxisTickX, originY + tickWidth)
   }
 
@@ -385,15 +392,15 @@ function renderKLineChart (
     // 绘制水平辅助线
     ctx.beginPath();
     ctx.setLineDash([4, 4]);
-    ctx.moveTo(padding, offsetY);
-    ctx.lineTo(width - padding, offsetY);
+    ctx.moveTo(padding.left, offsetY);
+    ctx.lineTo(width - padding.right, offsetY);
     ctx.stroke();
 
     // 绘制垂直辅助线
     ctx.beginPath();
     ctx.setLineDash([4, 4]);
-    ctx.moveTo(offsetX, padding);
-    ctx.lineTo(offsetX, height - padding);
+    ctx.moveTo(offsetX, padding.top);
+    ctx.lineTo(offsetX, height - padding.bottom);
     ctx.stroke();
 
 
@@ -408,6 +415,21 @@ function renderKLineChart (
 
     // 绘制y轴tip文字
     renderText(ctx, originX - 30, offsetY, tranOffsetYToYAxisValue(offsetY), 'left', '#fff')
+
+
+    // 绘制x轴tip文字背景框
+    ctx.beginPath();
+    ctx.rect(offsetX - tipBoxWidth / 2, originY, tipBoxWidth, tipBoxHeight);
+    ctx.fillStyle = '#999'
+    ctx.fill();
+
+    // 绘制x轴tip文字
+    // TODO 文字
+    // 当前横坐标在x轴上
+    const i = Math.round((offsetX - padding.left) / (width - padding.left - padding.right) * 10)
+
+    console.log('i: ', i);
+    renderText(ctx, offsetX, originY + tipBoxHeight / 2, 1, 'left', '#fff')
   }, false)
 
   // 监听鼠标离开事件并清除画布
@@ -421,14 +443,14 @@ function renderKLineChart (
   function isContentArea (e) {
     const { offsetX, offsetY } = e
 
-    return  offsetX > padding &&
-            offsetX < width - padding &&
-            offsetY > padding &&
-            offsetY < height - padding
+    return  offsetX > padding.left &&
+            offsetX < width - padding.right &&
+            offsetY > padding.top &&
+            offsetY < height - padding.bottom
   }
 
   function tranOffsetYToYAxisValue (OffsetY) {
-    return ((yAxisHeight + padding - OffsetY) / yAxisHeight * maxPrice).toFixed(2)
+    return ((yAxisHeight + padding.top - OffsetY) / yAxisHeight * maxPrice).toFixed(2)
   }
 }
 }
