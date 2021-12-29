@@ -23,25 +23,56 @@ if (canvas.getContext) {
   }
   renderKLineChart(data, config, true)
 
+
+  // 拖动起始x坐标
+  let dragstartPointX = undefined
+  // 水平拖动距离
+  let horizontalDragDistance = undefined
   /* 拖动目标元素时触发drag事件 */
   document.addEventListener("dragstart", function( event ) {
-
-  }, false);
-
-  /* 拖动目标元素时触发drag事件 */
-  document.addEventListener("drag", function( event ) {
-
-
     console.log('event: ', event);
-    // TODO 宽高待优化
+    // 清除提示画布并隐藏提示详情框
+    const tipCanvas = document.getElementById('tipCanvas');
+    const ctx = tipCanvas.getContext('2d');
     // 容器宽度
     const width = ctx.canvas.width
     // 容器高度
     const height = ctx.canvas.height
+    // 清除画布
     ctx.clearRect(0, 0, width, height)
 
-    const newData = [ { date: '08-31', heightPrice: 1030, lowPrice: 570, openingPrice: 700, closingPice: 850 }, ...data,]
-    renderKLineChart(newData, config, true)
+    // 记录拖动起始x坐标
+    dragstartPointX = event.offsetX
+
+    tipInfoEl = document.getElementById('tipInfo')
+    tipInfoEl.style.display = 'none'
+  }, false);
+
+  let newData = []
+  /* 拖动目标元素时触发drag事件 */
+  document.addEventListener("drag", function( event ) {
+    const { offsetX } = event
+    // 2.计算水平往右的拖动距离（先不考虑往左拖动）
+    console.log('horizontalDragDistance: ', horizontalDragDistance);
+    horizontalDragDistance = offsetX - dragstartPointX
+
+    // 只实现插入一条数据
+    // 先假设x轴每段宽度为30px
+    // 如果拖动距离大于段距离，则插入
+    if (horizontalDragDistance > 40) {
+      // 清除画布并输入新数据重新绘制
+      console.log('insert');
+      // TODO 宽高待优化
+      // 容器宽度
+      const width = ctx.canvas.width
+      // 容器高度
+      const height = ctx.canvas.height
+      ctx.clearRect(0, 0, width, height)
+
+      // 拿新数据重新绘制
+      newData = [ { date: '08-31', heightPrice: 1030, lowPrice: 570, openingPrice: 700, closingPice: 850 }, ...data,]
+      renderKLineChart(newData, config, true)
+    }
   }, false);
 
   // 拖动结束时，隐藏draggable，否则辅助线出不来
@@ -392,6 +423,7 @@ function renderKLineChart (
    * 绘制辅助线画布
    */
   function renderTipCanvas () {
+    console.log('绘制辅助线画布');
     const tipCanvas = document.getElementById('tipCanvas');
     if (!tipCanvas.getContext) return
     const ctx = tipCanvas.getContext('2d');
@@ -493,6 +525,7 @@ function renderKLineChart (
         }
       } else {
         // 显示提示详情框
+        // 这里会偶现一直被执行
         console.log('显示提示详情框');
         tipInfoEl.style.display = 'block'
         tipDateEl = document.getElementById('tipDate')
