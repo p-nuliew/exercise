@@ -12,7 +12,7 @@
     }
     #tipInfo {
       position: absolute;
-      z-index: 52;
+      z-index: 5;
       padding: 2px;
       width: 100px;
       line-height: 16px;
@@ -25,17 +25,32 @@
       display: none;
     }
 
+    #draggable{
+      position: absolute;
+      z-index: 10;
+      /* 50 + 10 */
+      left: 60px;
+      top: 30px;
+      width: 400px;
+      /* 240 - 10 */
+      height: 230px;
+      text-align: center;
+      /* background: greenyellow; */
+      display: none;
+    }
+
   </style>
 </head>
 <body>
-  <div style="position: relative;">
+  <div style="position: relative; left: 200px;">
     <canvas id="canvas" width="500" height="300"></canvas>
-    <canvas id="subCanvas" width="500" height="300" style="position: absolute; left: 0; top: 0;"></canvas>
+    <canvas id="tipCanvas" width="500" height="300" style="position: absolute; left: 0; top: 0;"></canvas>
     <div id="tipInfo">
       <div id="tipDate">09-09</div>
       <div id="heightPrice"></div>
       <div id="lowPrice"></div>
     </div>
+    <div id="draggable" draggable="true"></div>
   </div>
 
   <script src="./index.js"></script>

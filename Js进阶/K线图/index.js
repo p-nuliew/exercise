@@ -22,6 +22,36 @@ if (canvas.getContext) {
     yAxisSplitNumber: 6,
   }
   renderKLineChart(data, config, true)
+
+  /* 拖动目标元素时触发drag事件 */
+  document.addEventListener("dragstart", function( event ) {
+
+  }, false);
+
+  /* 拖动目标元素时触发drag事件 */
+  document.addEventListener("drag", function( event ) {
+
+
+    console.log('event: ', event);
+    // TODO 宽高待优化
+    // 容器宽度
+    const width = ctx.canvas.width
+    // 容器高度
+    const height = ctx.canvas.height
+    ctx.clearRect(0, 0, width, height)
+
+    const newData = [ { date: '08-31', heightPrice: 1030, lowPrice: 570, openingPrice: 700, closingPice: 850 }, ...data,]
+    renderKLineChart(newData, config, true)
+  }, false);
+
+  // 拖动结束时，隐藏draggable，否则辅助线出不来
+  document.addEventListener("dragend", function( event ) {
+    const draggable = document.getElementById('draggable')
+    draggable.style.display = 'none'
+  }, false);
+
+
+  // TODO removeEventListener()
 }
 
 /**
@@ -65,8 +95,8 @@ function renderKLineChart (
   // 可知条件
   // y轴横坐标
   const yAxisPointX = padding.left
-  // y轴纵坐标
-  const yAxisPointY = height - padding.bottom
+  // y轴原点纵坐标
+  const yAxisOriginPointY = height - padding.bottom
   // y轴顶点纵坐标
   const yAxisVertexY = padding.top
   // y轴高度
@@ -99,7 +129,7 @@ function renderKLineChart (
   // const splitBase = (maxPrice - minPrice) / yAxisSplitNumber
   // const yAxisTickText = i => (minPrice + splitBase * i).toFixed(2)
   // 不知道哪里计算错误
-  // const tranPriceToOrdinate = price => yAxisPointY - price / yAxisPriceRate + (price - minPrice) / yAxisPriceRate
+  // const tranPriceToOrdinate = price => yAxisOriginPointY - price / yAxisPriceRate + (price - minPrice) / yAxisPriceRate
 
   if (showTips) {
     renderTipCanvas()
@@ -107,15 +137,15 @@ function renderKLineChart (
 
   // 绘制Y轴
   ctx.beginPath()
-  ctx.moveTo(yAxisPointX, yAxisPointY)
+  ctx.moveTo(yAxisPointX, yAxisOriginPointY)
   ctx.lineTo(yAxisPointX, yAxisVertexY)
   ctx.closePath();
   ctx.stroke()
 
   // 绘制x轴
   ctx.beginPath()
-  ctx.moveTo(yAxisPointX, yAxisPointY)
-  ctx.lineTo(xAxisVertexX, yAxisPointY)
+  ctx.moveTo(yAxisPointX, yAxisOriginPointY)
+  ctx.lineTo(xAxisVertexX, yAxisOriginPointY)
   ctx.closePath();
   ctx.stroke()
 
@@ -128,17 +158,17 @@ function renderKLineChart (
 
   // 绘制x轴三角形
   ctx.beginPath()
-  ctx.moveTo(xAxisVertexX, yAxisPointY)
-  ctx.lineTo(xAxisVertexX - triangleH, yAxisPointY - triangleH/2)
-  ctx.lineTo(xAxisVertexX - triangleH, yAxisPointY + triangleH/2)
+  ctx.moveTo(xAxisVertexX, yAxisOriginPointY)
+  ctx.lineTo(xAxisVertexX - triangleH, yAxisOriginPointY - triangleH/2)
+  ctx.lineTo(xAxisVertexX - triangleH, yAxisOriginPointY + triangleH/2)
   ctx.fill()
 
   // 绘制y轴刻度
   for (let i = 0; i < yAxisSplitNumber; i++) {
     let sx = yAxisPointX
-        sy = yAxisPointY - yAxisTickSpace * i
+        sy = yAxisOriginPointY - yAxisTickSpace * i
         ex = yAxisPointX + tickWidth
-        ey = yAxisPointY - yAxisTickSpace * i
+        ey = yAxisOriginPointY - yAxisTickSpace * i
 
     renderText(ctx, sx - 10, sy, yAxisTickText(i), 'right', '#FF0000')
     renderLine(sx, sy, ex, ey)
@@ -147,8 +177,8 @@ function renderKLineChart (
   // 绘制x轴刻度
   for (let i = 0; i < xAxisItemLength; i++) {
     const xAxisTickX = xAxisTickPointX(i)
-    renderText(ctx, xAxisTickX, yAxisPointY + tickWidth + 10, seriesData[i], 'center', '#FF0000')
-    renderLine(xAxisTickX, yAxisPointY, xAxisTickX, yAxisPointY + tickWidth)
+    renderText(ctx, xAxisTickX, yAxisOriginPointY + tickWidth + 10, seriesData[i], 'center', '#FF0000')
+    renderLine(xAxisTickX, yAxisOriginPointY, xAxisTickX, yAxisOriginPointY + tickWidth)
   }
 
   // 绘制一串蜡烛
@@ -165,7 +195,7 @@ function renderKLineChart (
 
   // 实际价格转为纵坐标
   function tranPriceToOrdinate (price) {
-    return yAxisPointY - price / yAxisPriceRate
+    return yAxisOriginPointY - price / yAxisPriceRate
   }
 
   // Y轴刻度文字
@@ -362,7 +392,7 @@ function renderKLineChart (
    * 绘制辅助线画布
    */
   function renderTipCanvas () {
-    const tipCanvas = document.getElementById('subCanvas');
+    const tipCanvas = document.getElementById('tipCanvas');
     if (!tipCanvas.getContext) return
     const ctx = tipCanvas.getContext('2d');
 
@@ -371,9 +401,9 @@ function renderKLineChart (
     // 容器高度
     const height = ctx.canvas.height
     // 提示框元素
-    let promptBoxEl = null
+    let tipInfoEl = null
     // 提示框元素宽度
-    let promptBoxElWidth = 100
+    let tipInfoElWidth = 100
     // 提示框内的日期元素
     let tipDateEl = null
     // 提示框内的最高价元素
@@ -384,18 +414,33 @@ function renderKLineChart (
     const xyAxisTipBoxWidth = padding.left
     const xyAxisTipBoxHeight = 20
 
-    // 监听鼠标进入事件并清除画布
+    // 鼠标按下时，显示拖拽元素
+    tipCanvas.addEventListener('mousedown', function (e) {
+      const draggable = document.getElementById('draggable')
+      draggable.style.display = 'block'
+    }, false)
+
+    // 监听鼠标进入事件
     tipCanvas.addEventListener('mouseenter', function (e) {
-      promptBoxEl = document.getElementById('tipInfo')
+      // 保存提示详情框的引用
+      tipInfoEl = document.getElementById('tipInfo')
     }, false)
 
     // 监听鼠标移动事件并绘制辅助线
     tipCanvas.addEventListener('mousemove', function (e) {
+      // 鼠标距目标节点左上角的X坐标、Y坐标
       const { offsetX, offsetY } = e
       // 清除画布
       ctx.clearRect(0, 0, width, height)
 
-      if (!isContentArea(e)) return
+      // 不在内容区域则隐藏提示详情框并释放dom元素的绑定
+      if (!isContentArea(e)) {
+        tipInfoEl.style.display = 'none'
+        tipDateEl = null
+        heightPriceEl = null
+        lowPriceEl = null
+        return
+      }
 
       // 绘制水平辅助线
       ctx.beginPath();
@@ -408,7 +453,7 @@ function renderKLineChart (
       ctx.beginPath();
       ctx.setLineDash([4, 4]);
       ctx.moveTo(offsetX, padding.top);
-      ctx.lineTo(offsetX, yAxisPointY);
+      ctx.lineTo(offsetX, yAxisOriginPointY);
       ctx.stroke();
 
       // 绘制y轴tip文字背景框
@@ -424,13 +469,13 @@ function renderKLineChart (
 
       // 绘制x轴tip文字背景框
       ctx.beginPath();
-      ctx.rect(offsetX - xyAxisTipBoxWidth / 2, yAxisPointY, xyAxisTipBoxWidth, xyAxisTipBoxHeight);
+      ctx.rect(offsetX - xyAxisTipBoxWidth / 2, yAxisOriginPointY, xyAxisTipBoxWidth, xyAxisTipBoxHeight);
       ctx.fillStyle = '#999'
       ctx.fill();
 
       // 绘制x轴tip文字
       const xTipIndex = Math.round((offsetX - yAxisPointX) / xAxisWidth* xAxisItemLength)
-      renderText(ctx, offsetX, yAxisPointY + xyAxisTipBoxHeight / 2, seriesData[xTipIndex] || '', 'center', '#fff')
+      renderText(ctx, offsetX, yAxisOriginPointY + xyAxisTipBoxHeight / 2, seriesData[xTipIndex] || '', 'center', '#fff')
 
       // 设置提示框元素的样式和内容
       const { date, heightPrice, lowPrice } = data[xTipIndex]
@@ -439,32 +484,21 @@ function renderKLineChart (
         tipDateEl.innerText = date
         heightPriceEl.innerText = `最高价：${heightPrice}`
         lowPriceEl.innerText = `最低价：${lowPrice}`
+        // 如果光标在x轴后半部分，提示框定位到左侧，反之亦然
         if (xTipIndex > xAxisItemLength / 2) {
-          promptBoxEl.style.left = padding.left + xAxisWidth - promptBoxElWidth + 'px'
+          tipInfoEl.style.left = padding.left + 'px'
         } else {
-          promptBoxEl.style.width = promptBoxElWidth + 'px'
-          promptBoxEl.style.left = padding.left + 'px'
+          tipInfoEl.style.width = tipInfoElWidth + 'px'
+          tipInfoEl.style.left = padding.left + xAxisWidth - tipInfoElWidth + 'px'
         }
       } else {
-        promptBoxEl.style.display = 'block'
+        // 显示提示详情框
+        console.log('显示提示详情框');
+        tipInfoEl.style.display = 'block'
         tipDateEl = document.getElementById('tipDate')
         heightPriceEl = document.getElementById('heightPrice')
         lowPriceEl = document.getElementById('lowPrice')
       }
-    }, false)
-
-    // 监听鼠标离开事件并清除画布
-    tipCanvas.addEventListener('mouseleave', function (e) {
-      if (!isContentArea(e)) return
-      console.log('清除');
-
-      promptBoxEl.style.display = 'none'
-      ctx.clearRect(0, 0, width, height)
-      // 释放内存
-      promptBoxEl = null
-      tipDateEl = null
-      heightPriceEl = null
-      lowPriceEl = null
     }, false)
 
     // k线图内容区域
@@ -474,7 +508,7 @@ function renderKLineChart (
       return  offsetX > yAxisPointX &&
               offsetX < width - padding.right - xAxisWidth / xAxisItemLength &&
               offsetY > padding.top &&
-              offsetY < yAxisPointY
+              offsetY < yAxisOriginPointY
     }
 
   }
