@@ -20,69 +20,11 @@ if (canvas.getContext) {
   ctx = canvas.getContext('2d');
   const config = {
     yAxisSplitNumber: 6,
+    showTips: true,
+    canDrag: true,
   }
-  renderKLineChart(data, config, true)
+  renderKLineChart(data, config)
 
-
-  // 拖动起始x坐标
-  let dragstartPointX = undefined
-  // 水平拖动距离
-  let horizontalDragDistance = undefined
-  /* 拖动目标元素时触发drag事件 */
-  document.addEventListener("dragstart", function( event ) {
-    console.log('event: ', event);
-    // 清除提示画布并隐藏提示详情框
-    const tipCanvas = document.getElementById('tipCanvas');
-    const ctx = tipCanvas.getContext('2d');
-    // 容器宽度
-    const width = ctx.canvas.width
-    // 容器高度
-    const height = ctx.canvas.height
-    // 清除画布
-    ctx.clearRect(0, 0, width, height)
-
-    // 记录拖动起始x坐标
-    dragstartPointX = event.offsetX
-
-    tipInfoEl = document.getElementById('tipInfo')
-    tipInfoEl.style.display = 'none'
-  }, false);
-
-  let newData = []
-  /* 拖动目标元素时触发drag事件 */
-  document.addEventListener("drag", function( event ) {
-    const { offsetX } = event
-    // 2.计算水平往右的拖动距离（先不考虑往左拖动）
-    console.log('horizontalDragDistance: ', horizontalDragDistance);
-    horizontalDragDistance = offsetX - dragstartPointX
-
-    // 只实现插入一条数据
-    // 先假设x轴每段宽度为30px
-    // 如果拖动距离大于段距离，则插入
-    if (horizontalDragDistance > 40) {
-      // 清除画布并输入新数据重新绘制
-      console.log('insert');
-      // TODO 宽高待优化
-      // 容器宽度
-      const width = ctx.canvas.width
-      // 容器高度
-      const height = ctx.canvas.height
-      ctx.clearRect(0, 0, width, height)
-
-      // 拿新数据重新绘制
-      newData = [ { date: '08-31', heightPrice: 1030, lowPrice: 570, openingPrice: 700, closingPice: 850 }, ...data,]
-      renderKLineChart(newData, config, true)
-    }
-  }, false);
-
-  // 拖动结束时，隐藏draggable，否则辅助线出不来
-  document.addEventListener("dragend", function( event ) {
-    const draggable = document.getElementById('draggable')
-    draggable.style.display = 'none'
-  }, false);
-
-
-  // TODO removeEventListener()
 }
 
 /**
@@ -111,8 +53,11 @@ function renderKLineChart (
     candleW = 10,
     // 曲线类型
     curveType = 'lowPrice',
+    // 是否绘制辅助线
+    showTips = false,
+    // 是否可以拖拽
+    canDrag = false
   },
-  showTips = false
 ) {
 
   // 已知条件
@@ -122,6 +67,7 @@ function renderKLineChart (
   const height = ctx.canvas.height
   // x轴元素数量
   const xAxisItemLength = data.length
+  const config = arguments[1]
 
   // 可知条件
   // y轴横坐标
@@ -161,10 +107,6 @@ function renderKLineChart (
   // const yAxisTickText = i => (minPrice + splitBase * i).toFixed(2)
   // 不知道哪里计算错误
   // const tranPriceToOrdinate = price => yAxisOriginPointY - price / yAxisPriceRate + (price - minPrice) / yAxisPriceRate
-
-  if (showTips) {
-    renderTipCanvas()
-  }
 
   // 绘制Y轴
   ctx.beginPath()
@@ -218,6 +160,9 @@ function renderKLineChart (
   // 绘制贝塞尔曲线
   renderBezierCurve(getControlPointInfo(curveType))
 
+  showTips && renderTipCanvas()
+
+  canDrag && getDrag()
 
   // x轴刻度横坐标
   function xAxisTickPointX (i) {
@@ -283,10 +228,6 @@ function renderKLineChart (
       ctx.rect(abscissa - halfCandleW, secondPointY, candleW, thirdPointY - secondPointY)
       ctx.fillStyle = candleColor
       ctx.fill();
-
-      // TODO 因为没有绘制单个蜡烛的场景，所以没必要封装（偏应用），以一串蜡烛为颗粒这样使用更为方便
-      // 如果我们做的是类似图表库项目，就可以考虑封装为一个工具函数，在多个地方使用，提高复用率
-      // renderCandle(abscissa, topPointY, bottomPointY, secondPointY, thirdPointY, candleW, candleColor)
     }
   }
 
@@ -545,11 +486,60 @@ function renderKLineChart (
     }
 
   }
+
+  // 拖拽
+  function getDrag () {
+    // 拖动起始x坐标
+    let dragstartPointX = undefined
+    // 水平拖动距离
+    let horizontalDragDistance = undefined
+    // 新数据
+    let newData = []
+
+    /* 拖动目标元素时触发drag事件 */
+    document.addEventListener("dragstart", function( event ) {
+      // 清除提示画布并隐藏提示详情框
+      const tipCanvas = document.getElementById('tipCanvas');
+      const ctx = tipCanvas.getContext('2d');
+      // 容器宽度
+      const width = ctx.canvas.width
+      // 容器高度
+      const height = ctx.canvas.height
+      // 清除画布
+      ctx.clearRect(0, 0, width, height)
+
+      // 记录拖动起始x坐标
+      dragstartPointX = event.offsetX
+
+      tipInfoEl = document.getElementById('tipInfo')
+      tipInfoEl.style.display = 'none'
+    }, false);
+
+
+    /* 拖动目标元素时触发drag事件 */
+    document.addEventListener("drag", function( event ) {
+      const { offsetX } = event
+      // 2.计算水平往右的拖动距离（先不考虑往左拖动）
+      horizontalDragDistance = offsetX - dragstartPointX
+
+      // 只实现插入一条数据
+      // 先假设x轴每段宽度为30px
+      // 如果拖动距离大于段距离，则插入
+      if (horizontalDragDistance > 40) {
+        // 清除画布并输入新数据重新绘制
+        console.log('insert');
+        ctx.clearRect(0, 0, width, height)
+
+        // 拿新数据重新绘制
+        newData = [ { date: '08-31', heightPrice: 1030, lowPrice: 570, openingPrice: 700, closingPice: 850 }, ...data,]
+        renderKLineChart(newData, config, true)
+      }
+    }, false);
+
+    // 拖动结束时，隐藏draggable，否则辅助线出不来
+    document.addEventListener("dragend", function( event ) {
+      const draggable = document.getElementById('draggable')
+      draggable.style.display = 'none'
+    }, false);
+  }
 }
-
-
-
-
-
-// TODO 怎样定义内部
-// 如果一个函数或者组件内部的某段逻辑出现了好几次，我们可以将它封装成函数，执行函数时不需要通过参数传入，可以利用闭包的特性在封装函数内部直接访问外部变量。

@@ -72,7 +72,6 @@ ctx.moveTo(75, 50);
 
 //     // 绘制蜡烛中间部分
 //     // 上 右 下 左 坐标
-//     // TODO
 //     ctx.beginPath()
 //     ctx.moveTo(sx + candleW / 2, sy - candleTopPointY)
 //     ctx.lineTo(sx + candleW / 2, sy - candleBottomPointY)
