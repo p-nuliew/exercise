@@ -6,7 +6,7 @@ canvas.style.background = '#e8e8e8'
 const data = [
   { date: '09-01', heightPrice: 1000, lowPrice: 510, openingPrice: 800, closingPice: 900 },
   { date: '09-02', heightPrice: 1000, lowPrice: 510, openingPrice: 800, closingPice: 700 },
-  { date: '09-03', heightPrice: 1000, lowPrice: 100, openingPrice: 800, closingPice: 900 },
+  { date: '09-03', heightPrice: 1000, lowPrice: 400, openingPrice: 800, closingPice: 900 },
   { date: '09-04', heightPrice: 905, lowPrice: 625, openingPrice: 701, closingPice: 903 },
   { date: '09-05', heightPrice: 1000, lowPrice: 550, openingPrice: 807, closingPice: 709 },
   { date: '09-06', heightPrice: 1000, lowPrice: 800, openingPrice: 807, closingPice: 909 },
@@ -79,7 +79,7 @@ function renderKLineChart (
   // y轴高度
   const yAxisHeight = height - (padding.top + padding.bottom)
   // y轴刻度间距
-  const yAxisTickSpace = yAxisHeight / yAxisSplitNumber
+  const yAxisTickSpace = yAxisHeight / (yAxisSplitNumber - 1)
   // x轴顶点横坐标
   const xAxisVertexX = width - yAxisPointX
   // x轴宽度
@@ -90,6 +90,8 @@ function renderKLineChart (
   const maxPrice = Math.max(...data.map(x => x.heightPrice))
   // 最低价
   const minPrice = Math.min(...data.map(x => x.lowPrice))
+  // 坐标系内容高度占坐标系高度的比例
+  const contentRate = 0.9 || 1
 
   // 纵坐标集合
   const dataYAxisPoint = data.map(it => {
@@ -131,15 +133,14 @@ function renderKLineChart (
   ctx.lineTo(xAxisVertexX - triangleH, yAxisOriginPointY + triangleH/2)
   ctx.fill()
 
-  // 绘制y轴刻度
+  // 绘制y轴文字与刻度
   for (let i = 0; i < yAxisSplitNumber; i++) {
     let sx = yAxisPointX
-        sy = yAxisOriginPointY - yAxisTickSpace * i
         ex = yAxisPointX + tickWidth
-        ey = yAxisOriginPointY - yAxisTickSpace * i
+        y = yAxisOriginPointY - yAxisTickSpace * i * contentRate
 
-    renderText(ctx, sx - 10, sy, yAxisTickText(i), 'right', '#FF0000')
-    renderLine(sx, sy, ex, ey)
+    renderText(ctx, sx - 10, y, yAxisTickText(i), 'right', '#FF0000')
+    renderLine(sx, y, ex, y)
   }
 
   // 绘制x轴刻度
@@ -167,7 +168,7 @@ function renderKLineChart (
   // 实际价格转为canvas纵坐标
   function tranPriceToOrdinate (price) {
     // 每块钱占自定义坐标系的高度
-    const rate = yAxisHeight / (maxPrice - minPrice)
+    const rate = yAxisHeight / (maxPrice - minPrice) * contentRate
     // 当前价格占自定义坐标系的高度
     const h = rate *  (price - minPrice)
 
