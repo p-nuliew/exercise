@@ -4,9 +4,9 @@ canvas.style.background = '#e8e8e8'
 
 // 最高价、最低价、开盘价、收盘价
 const data = [
-  { date: '09-01', heightPrice: 1000, lowPrice: 510, openingPrice: 800, closingPice: 900 },
-  { date: '09-02', heightPrice: 1000, lowPrice: 510, openingPrice: 800, closingPice: 700 },
-  { date: '09-03', heightPrice: 1000, lowPrice: 100, openingPrice: 800, closingPice: 900 },
+  { date: '09-01', heightPrice: 1000, lowPrice: 500, openingPrice: 800, closingPice: 900 },
+  { date: '09-02', heightPrice: 2000, lowPrice: 625, openingPrice: 800, closingPice: 700 },
+  { date: '09-03', heightPrice: 1000, lowPrice: 750, openingPrice: 800, closingPice: 900 },
   { date: '09-04', heightPrice: 905, lowPrice: 625, openingPrice: 701, closingPice: 903 },
   { date: '09-05', heightPrice: 1000, lowPrice: 550, openingPrice: 807, closingPice: 709 },
   { date: '09-06', heightPrice: 1000, lowPrice: 800, openingPrice: 807, closingPice: 909 },
@@ -86,22 +86,33 @@ function renderKLineChart (
   const xAxisWidth = width - yAxisPointX - padding.right
   // x轴刻度间距
   const xAxisTickSpace = xAxisWidth/ xAxisItemLength
-  // 最高价
+   // 最高价最大的值
   const maxPrice = Math.max(...data.map(x => x.heightPrice))
-  // 最低价
-  const minPrice = Math.min(...data.map(x => x.lowPrice))
-
+  // 价格与y轴高度的比率
+  const yAxisPriceRate = maxPrice / yAxisHeight
   // 纵坐标集合
   const dataYAxisPoint = data.map(it => {
     const newIt = {}
     for (key in it) {
-      if (key === 'date') continue
       newIt[key] =  tranPriceToOrdinate(it[key])
     }
     return newIt
   })
 
   const seriesData = data.map(it => it.date)
+
+  // TODO Y轴刻度和纵坐标优化
+  // const minPrice = Math.min(...data.map(x => x.lowPrice))
+  // const splitBase = (maxPrice - minPrice) / yAxisSplitNumber
+  // const yAxisTickText = i => (minPrice + splitBase * i).toFixed(2)
+  // 不知道哪里计算错误
+  // const tranPriceToOrdinate = price => yAxisOriginPointY - price / yAxisPriceRate + (price - minPrice) / yAxisPriceRate
+
+  // 先求当前坐标系高度，再算出canvas坐标系纵坐标
+  // 当前坐标系高度：(maxPrice - minPrice) / yAxisHeight *  (price - minPrice)
+  // const tranPriceToOrdinate = price => yAxisOriginPointY - (maxPrice - minPrice) / yAxisHeight *  (price - minPrice)
+
+
 
   // 绘制Y轴
   ctx.beginPath()
@@ -164,22 +175,15 @@ function renderKLineChart (
     return yAxisPointX + i * xAxisTickSpace
   }
 
-  // 实际价格转为canvas纵坐标
+  // 实际价格转为纵坐标
   function tranPriceToOrdinate (price) {
-    // 每块钱占自定义坐标系的高度
-    const rate = yAxisHeight / (maxPrice - minPrice)
-    // 当前价格占自定义坐标系的高度
-    const h = rate *  (price - minPrice)
-
-    return yAxisOriginPointY - h
+    return yAxisOriginPointY - price / yAxisPriceRate
   }
 
   // Y轴刻度文字
-  function yAxisTickText (i) {
-      // 每个像素占多少钱
-    const x = (maxPrice - minPrice) / yAxisHeight
-    return (minPrice + yAxisTickSpace * i * x).toFixed(2)
-  }
+  // function yAxisTickText (i) {
+  //   return (yAxisTickSpace * i * yAxisPriceRate).toFixed(2)
+  // }
 
   /**
    * 绘制一串蜡烛
@@ -231,6 +235,10 @@ function renderKLineChart (
       ctx.fillStyle = candleColor
       ctx.fill();
     }
+
+    setInterval(() => {
+
+    }, 1000)
   }
 
    /**
@@ -249,11 +257,11 @@ function renderKLineChart (
 
       // 边界处理：在首尾加入虚拟点，不全第一个元素没有前控制点，末尾元素没有后控制点的情况
       if (i === 0) {
-        prevNode = { heightPrice: tranPriceToOrdinate(1000), lowPrice: tranPriceToOrdinate(600), openingPrice: tranPriceToOrdinate(780), closingPice: tranPriceToOrdinate(899) }
+        prevNode = { heightPrice: tranPriceToOrdinate(100), lowPrice: tranPriceToOrdinate(60), openingPrice: tranPriceToOrdinate(70), closingPice: tranPriceToOrdinate(99) }
         nextNode = dataYAxisPoint[i + 1]
       } else if (i === xAxisItemLength - 1) {
         prevNode = dataYAxisPoint[i - 1]
-        nextNode = { heightPrice: tranPriceToOrdinate(1021), lowPrice: tranPriceToOrdinate(720), openingPrice: tranPriceToOrdinate(782), closingPice: tranPriceToOrdinate(889) }
+        nextNode = { heightPrice: tranPriceToOrdinate(101), lowPrice: tranPriceToOrdinate(20), openingPrice: tranPriceToOrdinate(72), closingPice: tranPriceToOrdinate(89) }
       } else {
         prevNode = dataYAxisPoint[i - 1]
         nextNode = dataYAxisPoint[i + 1]
@@ -261,7 +269,7 @@ function renderKLineChart (
 
       // 前后点构成的三角形
       // b: 三角形的高
-      const triangleHeight = Math.abs(nextNode[curveType] - prevNode[curveType])
+      const triangleHeight = Math.abs(nextNode.lowPrice - prevNode.lowPrice)
       // a: 三角形底边
       const triangleBottomLine = xAxisTickSpace * 2
       // c: 三角形斜边 = (高的平方+底边的平方)的平方根
@@ -545,3 +553,16 @@ function renderKLineChart (
     }, false);
   }
 }
+
+
+// 封装的目的：简化代码
+// 找多个场景的共性和差异
+// y轴、x轴的调整
+// 缩放
+
+// 应用层：
+// 1. 数据如何来：接口（默认10点，预准备30个数据）
+// 2. 缩放最多展示多少数据（）一屏20，拖到20个后请求数据
+// 隔点展示
+
+// 作为内部项目使用的背景：轻量，定制化需求
