@@ -16,6 +16,13 @@ for (let i in obj) {
 }
 // logs: a b xxx
 
+// continue 可以跳过这次循环
+for (let i in obj) {
+  if (i === 'a') continue
+  console.log(i);
+}
+
+
 // hasOwnProperty 过滤掉原型链继承到的属性
 for (let i in obj) {
   if (obj.hasOwnProperty(i)) {

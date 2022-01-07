@@ -2,6 +2,31 @@
 const canvas = document.getElementById('canvas');
 canvas.style.background = '#e8e8e8'
 
+const leftData = [
+  { date: '08-21', heightPrice: 1200, lowPrice: 580, openingPrice: 860, closingPice: 980 },
+  { date: '08-22', heightPrice: 2000, lowPrice: 625, openingPrice: 800, closingPice: 700 },
+  { date: '08-23', heightPrice: 1000, lowPrice: 750, openingPrice: 800, closingPice: 900 },
+  { date: '08-24', heightPrice: 905, lowPrice: 625, openingPrice: 701, closingPice: 903 },
+  { date: '08-25', heightPrice: 1000, lowPrice: 550, openingPrice: 807, closingPice: 789 },
+  { date: '08-26', heightPrice: 1000, lowPrice: 300, openingPrice: 607, closingPice: 989 },
+  { date: '08-27', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
+  { date: '08-28', heightPrice: 1000, lowPrice: 400, openingPrice: 900, closingPice: 908 },
+  { date: '08-29', heightPrice: 904, lowPrice: 680, openingPrice: 701, closingPice: 883 },
+  { date: '08-30', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
+]
+const rightData = [
+  { date: '09-11', heightPrice: 1000, lowPrice: 500, openingPrice: 800, closingPice: 900 },
+  { date: '09-12', heightPrice: 2000, lowPrice: 625, openingPrice: 800, closingPice: 700 },
+  { date: '09-13', heightPrice: 1000, lowPrice: 750, openingPrice: 800, closingPice: 900 },
+  { date: '09-14', heightPrice: 905, lowPrice: 625, openingPrice: 701, closingPice: 903 },
+  { date: '09-15', heightPrice: 1000, lowPrice: 550, openingPrice: 807, closingPice: 709 },
+  { date: '09-16', heightPrice: 1000, lowPrice: 800, openingPrice: 807, closingPice: 909 },
+  { date: '09-17', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
+  { date: '09-18', heightPrice: 1000, lowPrice: 600, openingPrice: 900, closingPice: 908 },
+  { date: '09-19', heightPrice: 904, lowPrice: 600, openingPrice: 701, closingPice: 803 },
+  { date: '09-20', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
+]
+
 // 最高价、最低价、开盘价、收盘价
 const data = [
   { date: '09-01', heightPrice: 1000, lowPrice: 510, openingPrice: 800, closingPice: 900 },
@@ -18,12 +43,13 @@ const data = [
 
 if (canvas.getContext) {
   ctx = canvas.getContext('2d');
+  let init = true
   const config = {
     yAxisSplitNumber: 6,
     showTips: true,
     canDrag: true,
   }
-  renderKLineChart(data, config)
+  renderKLineChart(data, config, init)
 
 }
 
@@ -31,7 +57,6 @@ if (canvas.getContext) {
  * 绘制k线图
  * @param {array} data 数据源
  * @param {object} config k线图配置项
- * @param {boolean} showTips 是否展示辅助线
  */
 function renderKLineChart (
   data = [],
@@ -58,7 +83,9 @@ function renderKLineChart (
     // 是否可以拖拽
     canDrag = false
   },
+  init
 ) {
+  console.log('开始绘制k线图:', data);
 
   // 已知条件
   // 容器宽度
@@ -84,8 +111,8 @@ function renderKLineChart (
   const xAxisVertexX = width - yAxisPointX
   // x轴宽度
   const xAxisWidth = width - yAxisPointX - padding.right
-  // x轴刻度间距
-  const xAxisTickSpace = xAxisWidth/ xAxisItemLength
+  // x轴元素间距
+  const xAxisItemSpace = xAxisWidth/ xAxisItemLength
   // 最高价
   const maxPrice = Math.max(...data.map(x => x.heightPrice))
   // 最低价
@@ -155,14 +182,19 @@ function renderKLineChart (
 
   // 绘制贝塞尔曲线
   renderBezierCurve(getControlPointInfo(curveType))
+  console.log('绘制完成');
 
-  showTips && renderTipCanvas()
+  if (init) {
+    showTips && renderTipCanvas()
+    canDrag && getDrag()
+  }
 
-  canDrag && getDrag()
+  // 初始化完毕
+  init = false
 
   // x轴刻度横坐标
   function xAxisTickPointX (i) {
-    return yAxisPointX + i * xAxisTickSpace
+    return yAxisPointX + i * xAxisItemSpace
   }
 
   // 实际价格转为canvas纵坐标
@@ -239,7 +271,7 @@ function renderKLineChart (
    * @param {string} curveType 曲线类型 { heightPrice, lowPrice, openingPrice, closingPice }
    * @returns [array] 当前点以及前后控制点坐集合
    */
-  function getControlPointInfo (curveType) {
+  function getControlPointInfo (curveType = curveType) {
     let controlPoint = []
 
     for (let i = 0; i < xAxisItemLength; i++) {
@@ -264,13 +296,13 @@ function renderKLineChart (
       // b: 三角形的高
       const triangleHeight = Math.abs(nextNode[curveType] - prevNode[curveType])
       // a: 三角形底边
-      const triangleBottomLine = xAxisTickSpace * 2
+      const triangleBottomLine = xAxisItemSpace * 2
       // c: 三角形斜边 = (高的平方+底边的平方)的平方根
       const triangleHypotenuse = Math.sqrt(Math.pow(triangleHeight, 2) +  Math.pow(triangleBottomLine, 2))
 
       // 前后控制点为斜边的三角形
       // C: 控制点三角形斜边长度(自定义)
-      const controlPointW = xAxisTickSpace * 0.5
+      const controlPointW = xAxisItemSpace * 0.5
       // A: 控制点三角形底边
       const controlPointBottomLine = controlPointW * triangleBottomLine / triangleHypotenuse
       // B: 控制点三角形的高
@@ -353,6 +385,7 @@ function renderKLineChart (
    * @param {string} color 文本颜色
    */
   // TODO 把参数放在对象下传入是不是更方便？
+  // 5个以上的参数，用对象比较方便。
   function renderText (context = ctx, x, y, text, align = 'left', color = '#FFF') {
     // context.fillStyle = "#FF0000";  // 文字颜色
     context.fillStyle = color;  // 文字颜色
@@ -492,15 +525,19 @@ function renderKLineChart (
 
   // 拖拽
   function getDrag () {
-    // 拖动起始x坐标
-    let dragstartPointX = undefined
+    console.log('getDrag: ');
     // 水平拖动距离
-    let horizontalDragDistance = undefined
+    let horizontalDragDistance = 0
     // 新数据
-    let newData = []
+    let newData = [...data]
+    // 光标当前位置
+    let pointerPosition = 0
+    // 是否重置水平拖动距离
+    let resetHorizontalDragDistance = false
 
     /* 拖动目标元素时触发drag事件 */
     document.addEventListener("dragstart", function( event ) {
+      console.log('dragstart: ');
       // 清除提示画布并隐藏提示详情框
       const tipCanvas = document.getElementById('tipCanvas');
       const ctx = tipCanvas.getContext('2d');
@@ -508,11 +545,10 @@ function renderKLineChart (
       const width = ctx.canvas.width
       // 容器高度
       const height = ctx.canvas.height
-      // 清除画布
+      // 清除提示画布
       ctx.clearRect(0, 0, width, height)
 
-      // 记录拖动起始x坐标
-      dragstartPointX = event.offsetX
+      pointerPosition = event.offsetX
 
       tipInfoEl = document.getElementById('tipInfo')
       tipInfoEl.style.display = 'none'
@@ -522,20 +558,32 @@ function renderKLineChart (
     /* 拖动目标元素时触发drag事件 */
     document.addEventListener("drag", function( event ) {
       const { offsetX } = event
-      // 2.计算水平往右的拖动距离（先不考虑往左拖动）
-      horizontalDragDistance = offsetX - dragstartPointX
 
-      // 只实现插入一条数据
-      // 先假设x轴每段宽度为30px
-      // 如果拖动距离大于段距离，则插入
-      if (horizontalDragDistance > 40) {
+      // // 如果左侧数据全部显示完成，则不绘制
+      if (leftData.length === 0) return
+
+      // 根据上一刻的光标位置，判断鼠标拖动方向
+      // if (pointerPosition < offsetX) {
+
+      //   console.log('右');
+      // } else {
+      //   console.log('左');
+      // }
+
+      // // 2.计算水平往右的拖动距离（先不考虑往左拖动）
+      horizontalDragDistance = offsetX - pointerPosition
+      console.log('12-------------horizontalDragDistance: ', horizontalDragDistance);
+
+      // // 如果拖动距离大于x轴元素间距，则插入
+      if ( horizontalDragDistance > xAxisItemSpace) {
         // 清除画布并输入新数据重新绘制
-        console.log('insert');
         ctx.clearRect(0, 0, width, height)
-
         // 拿新数据重新绘制
-        newData = [ { date: '08-31', heightPrice: 1030, lowPrice: 570, openingPrice: 700, closingPice: 850 }, ...data,]
-        renderKLineChart(newData, config, true)
+        newData.unshift(leftData.pop())
+        renderKLineChart(newData, config)
+
+        // 记录插入数据时的光标位置
+        pointerPosition = offsetX
       }
     }, false);
 
