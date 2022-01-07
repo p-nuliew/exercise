@@ -4,7 +4,7 @@ canvas.style.background = '#e8e8e8'
 
 const leftData = [
   { date: '08-21', heightPrice: 1200, lowPrice: 580, openingPrice: 860, closingPice: 980 },
-  { date: '08-22', heightPrice: 2000, lowPrice: 625, openingPrice: 800, closingPice: 700 },
+  { date: '08-22', heightPrice: 1500, lowPrice: 625, openingPrice: 800, closingPice: 700 },
   { date: '08-23', heightPrice: 1000, lowPrice: 750, openingPrice: 800, closingPice: 900 },
   { date: '08-24', heightPrice: 905, lowPrice: 625, openingPrice: 701, closingPice: 903 },
   { date: '08-25', heightPrice: 1000, lowPrice: 550, openingPrice: 807, closingPice: 789 },
@@ -16,7 +16,7 @@ const leftData = [
 ]
 const rightData = [
   { date: '09-11', heightPrice: 1000, lowPrice: 500, openingPrice: 800, closingPice: 900 },
-  { date: '09-12', heightPrice: 2000, lowPrice: 625, openingPrice: 800, closingPice: 700 },
+  { date: '09-12', heightPrice: 990, lowPrice: 625, openingPrice: 800, closingPice: 700 },
   { date: '09-13', heightPrice: 1000, lowPrice: 750, openingPrice: 800, closingPice: 900 },
   { date: '09-14', heightPrice: 905, lowPrice: 625, openingPrice: 701, closingPice: 903 },
   { date: '09-15', heightPrice: 1000, lowPrice: 550, openingPrice: 807, closingPice: 709 },
@@ -114,8 +114,8 @@ function renderKLineChart (
   const xAxisItemSpace = xAxisWidth/ xAxisItemLength
   // 最高价
   const maxPrice = Math.max(...data.map(x => x.heightPrice))
-  // 最低价
-  const minPrice = Math.min(...data.map(x => x.lowPrice))
+  // 最低价（在最低价的基础上 - 50）
+  const minPrice = Math.min(...data.map(x => x.lowPrice)) - 50
   // 坐标系内容高度占坐标系高度的比例
   const contentRate = 0.9 || 1
 
@@ -384,7 +384,7 @@ function renderKLineChart (
    * @param {string} color 文本颜色
    */
   // TODO 把参数放在对象下传入是不是更方便？
-  // 5个以上的参数，用对象比较方便。
+  // 5个以上的参数，用对象比较方便，但是要给key值
   function renderText (context = ctx, x, y, text, align = 'left', color = '#FFF') {
     // context.fillStyle = "#FF0000";  // 文字颜色
     context.fillStyle = color;  // 文字颜色
@@ -402,12 +402,12 @@ function renderKLineChart (
     console.log('绘制辅助线画布');
     const tipCanvas = document.getElementById('tipCanvas');
     if (!tipCanvas.getContext) return
-    const ctx = tipCanvas.getContext('2d');
+    const ctxTip = tipCanvas.getContext('2d');
 
     // 容器宽度
-    const width = ctx.canvas.width
+    const width = ctxTip.canvas.width
     // 容器高度
-    const height = ctx.canvas.height
+    const height = ctxTip.canvas.height
     // 提示框元素
     let tipInfoEl = null
     // 提示框元素宽度
@@ -424,8 +424,33 @@ function renderKLineChart (
 
     // 鼠标按下时，显示拖拽元素
     tipCanvas.addEventListener('mousedown', function (e) {
-      const draggable = document.getElementById('draggable')
-      draggable.style.display = 'block'
+      if (canDrag) {
+        //创建拖拽元素
+        const kWrapNode = document.getElementById('kWrap')
+        const draggableNode = document.getElementById('draggable')
+        console.log('draggableNode: ', draggableNode);
+
+        // 如果拖拽元素存在，则显示（避免重复创建）
+        if (draggableNode) {
+          draggableNode.style.display = 'block'
+          return
+        }
+
+        const div = document.createElement('div')
+
+        div.style.position = 'absolute'
+        div.style.zIndex = '10'
+        div.style.left = `${padding.left}px`
+        div.style.top = `${padding.top}px`
+        div.style.width = `${width - padding.left - padding.right}px`
+        div.style.height = `${height - padding.top - padding.bottom}px`
+        // div.style.background = 'yellow'
+
+        div.setAttribute('id', 'draggable')
+        div.setAttribute('draggable', 'true')
+
+        kWrapNode.appendChild(div)
+      }
     }, false)
 
     // 监听鼠标进入事件
@@ -439,7 +464,7 @@ function renderKLineChart (
       // 鼠标距目标节点左上角的X坐标、Y坐标
       const { offsetX, offsetY } = e
       // 清除画布
-      ctx.clearRect(0, 0, width, height)
+      ctxTip.clearRect(0, 0, width, height)
 
       // 不在内容区域则隐藏提示详情框并释放dom元素的绑定
       if (!isContentArea(e)) {
@@ -451,39 +476,39 @@ function renderKLineChart (
       }
 
       // 绘制水平辅助线
-      ctx.beginPath();
-      ctx.setLineDash([4, 4]);
-      ctx.moveTo(yAxisPointX, offsetY);
-      ctx.lineTo(width - padding.right - xAxisWidth / xAxisItemLength, offsetY);
-      ctx.stroke();
+      ctxTip.beginPath();
+      ctxTip.setLineDash([4, 4]);
+      ctxTip.moveTo(yAxisPointX, offsetY);
+      ctxTip.lineTo(width - padding.right - xAxisWidth / xAxisItemLength, offsetY);
+      ctxTip.stroke();
 
       // 绘制垂直辅助线
-      ctx.beginPath();
-      ctx.setLineDash([4, 4]);
-      ctx.moveTo(offsetX, padding.top);
-      ctx.lineTo(offsetX, yAxisOriginPointY);
-      ctx.stroke();
+      ctxTip.beginPath();
+      ctxTip.setLineDash([4, 4]);
+      ctxTip.moveTo(offsetX, padding.top);
+      ctxTip.lineTo(offsetX, yAxisOriginPointY);
+      ctxTip.stroke();
 
       // 绘制y轴tip文字背景框
-      ctx.beginPath();
-      ctx.rect(0, offsetY - xyAxisTipBoxHeight / 2, xyAxisTipBoxWidth, xyAxisTipBoxHeight);
-      ctx.fillStyle = '#999'
-      ctx.fill();
+      ctxTip.beginPath();
+      ctxTip.rect(0, offsetY - xyAxisTipBoxHeight / 2, xyAxisTipBoxWidth, xyAxisTipBoxHeight);
+      ctxTip.fillStyle = '#999'
+      ctxTip.fill();
 
       // 绘制y轴tip文字
       const yAxisValue = ((yAxisHeight + padding.top - offsetY) / yAxisHeight * maxPrice).toFixed(2)
-      renderText(ctx, yAxisPointX - 30, offsetY, yAxisValue, 'left', '#fff')
+      renderText(ctxTip, yAxisPointX - 30, offsetY, yAxisValue, 'left', '#fff')
 
 
       // 绘制x轴tip文字背景框
-      ctx.beginPath();
-      ctx.rect(offsetX - xyAxisTipBoxWidth / 2, yAxisOriginPointY, xyAxisTipBoxWidth, xyAxisTipBoxHeight);
-      ctx.fillStyle = '#999'
-      ctx.fill();
+      ctxTip.beginPath();
+      ctxTip.rect(offsetX - xyAxisTipBoxWidth / 2, yAxisOriginPointY, xyAxisTipBoxWidth, xyAxisTipBoxHeight);
+      ctxTip.fillStyle = '#999'
+      ctxTip.fill();
 
       // 绘制x轴tip文字
       const xTipIndex = Math.round((offsetX - yAxisPointX) / xAxisWidth* xAxisItemLength)
-      renderText(ctx, offsetX, yAxisOriginPointY + xyAxisTipBoxHeight / 2, seriesData[xTipIndex] || '', 'center', '#fff')
+      renderText(ctxTip, offsetX, yAxisOriginPointY + xyAxisTipBoxHeight / 2, seriesData[xTipIndex] || '', 'center', '#fff')
 
       // 设置提示框元素的样式和内容
       const { date, heightPrice, lowPrice } = data[xTipIndex]
@@ -525,12 +550,13 @@ function renderKLineChart (
   // 拖拽
   function getDrag () {
     console.log('getDrag: ');
-    // 水平拖动距离
-    let horizontalDragDistance = 0
     // 新数据
     let cloneData = [...data]
     let cloneLeftData = [...leftData]
     let cloneRightData = [...rightData]
+
+    // 水平拖动距离
+    let horizontalDragDistance = 0
     // 插入数据时的光标位置
     let insertPosition = 0
     // 光标的上一个位置
@@ -543,15 +569,16 @@ function renderKLineChart (
       console.log('dragstart: ');
       // 清除提示画布并隐藏提示详情框
       const tipCanvas = document.getElementById('tipCanvas');
-      const ctx = tipCanvas.getContext('2d');
+      const ctxTip = tipCanvas.getContext('2d');
       // 容器宽度
-      const width = ctx.canvas.width
+      const width = ctxTip.canvas.width
       // 容器高度
-      const height = ctx.canvas.height
+      const height = ctxTip.canvas.height
       // 清除提示画布
-      ctx.clearRect(0, 0, width, height)
+      ctxTip.clearRect(0, 0, width, height)
 
-      insertPosition = lastPosition = event.offsetX
+      insertPosition = event.offsetX
+      lastPosition = event.offsetX
 
       tipInfoEl = document.getElementById('tipInfo')
       tipInfoEl.style.display = 'none'
@@ -560,6 +587,7 @@ function renderKLineChart (
 
     /* 拖动目标元素时触发drag事件 */
     document.addEventListener("drag", function( event ) {
+      console.log('event: ', event);
       const { offsetX } = event
 
       // // 如果左侧数据全部显示完成，则不绘制
@@ -567,7 +595,9 @@ function renderKLineChart (
 
       // 计算水平往右的拖动距离
       horizontalDragDistance = Math.abs(offsetX - insertPosition)
-      console.log('12-------------horizontalDragDistance: ', horizontalDragDistance);
+      console.log('offsetX: ', offsetX);
+      // console.log('插入数据时的光标位置: ', insertPosition);
+      // console.log('12-------------拖动距离: ', horizontalDragDistance);
 
       // // 如果拖动距离大于x轴元素间距，则插入
       if ( horizontalDragDistance > xAxisItemSpace) {
@@ -606,6 +636,13 @@ function renderKLineChart (
 
     // 拖动结束时，隐藏draggable，否则辅助线出不来
     document.addEventListener("dragend", function( event ) {
+      // 水平拖动距离
+      horizontalDragDistance = 0
+      // 插入数据时的光标位置
+      insertPosition = 0
+      // 光标的上一个位置
+      lastPosition = ''
+
       const draggable = document.getElementById('draggable')
       draggable.style.display = 'none'
     }, false);
