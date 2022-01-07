@@ -50,7 +50,6 @@ if (canvas.getContext) {
     canDrag: true,
   }
   renderKLineChart(data, config, init)
-
 }
 
 /**
@@ -83,7 +82,7 @@ function renderKLineChart (
     // 是否可以拖拽
     canDrag = false
   },
-  init
+  init = false
 ) {
   console.log('开始绘制k线图:', data);
 
@@ -529,11 +528,15 @@ function renderKLineChart (
     // 水平拖动距离
     let horizontalDragDistance = 0
     // 新数据
-    let newData = [...data]
-    // 光标当前位置
-    let pointerPosition = 0
-    // 是否重置水平拖动距离
-    let resetHorizontalDragDistance = false
+    let cloneData = [...data]
+    let cloneLeftData = [...leftData]
+    let cloneRightData = [...rightData]
+    // 插入数据时的光标位置
+    let insertPosition = 0
+    // 光标的上一个位置
+    let lastPosition = ''
+    // 拖动方向 左 or 右
+    let dragDirection = 'left'
 
     /* 拖动目标元素时触发drag事件 */
     document.addEventListener("dragstart", function( event ) {
@@ -548,7 +551,7 @@ function renderKLineChart (
       // 清除提示画布
       ctx.clearRect(0, 0, width, height)
 
-      pointerPosition = event.offsetX
+      insertPosition = lastPosition = event.offsetX
 
       tipInfoEl = document.getElementById('tipInfo')
       tipInfoEl.style.display = 'none'
@@ -560,31 +563,45 @@ function renderKLineChart (
       const { offsetX } = event
 
       // // 如果左侧数据全部显示完成，则不绘制
-      if (leftData.length === 0) return
+      if (cloneLeftData.length === 0) return
 
-      // 根据上一刻的光标位置，判断鼠标拖动方向
-      // if (pointerPosition < offsetX) {
-
-      //   console.log('右');
-      // } else {
-      //   console.log('左');
-      // }
-
-      // // 2.计算水平往右的拖动距离（先不考虑往左拖动）
-      horizontalDragDistance = offsetX - pointerPosition
+      // 计算水平往右的拖动距离
+      horizontalDragDistance = Math.abs(offsetX - insertPosition)
       console.log('12-------------horizontalDragDistance: ', horizontalDragDistance);
 
       // // 如果拖动距离大于x轴元素间距，则插入
       if ( horizontalDragDistance > xAxisItemSpace) {
         // 清除画布并输入新数据重新绘制
         ctx.clearRect(0, 0, width, height)
+
+        // 根据上一刻的光标位置，判断鼠标拖动方向，更新展示数据
+        if (lastPosition !== offsetX) {
+          if (lastPosition < offsetX) {
+            console.log('右');
+            dragDirection = 'right'
+
+            const node = cloneLeftData.pop()
+            cloneData.unshift(node)
+            cloneData.pop()
+            cloneRightData.unshift(node)
+          } else {
+            dragDirection = 'left'
+
+            const node = cloneRightData.shift()
+            cloneData.push(node)
+            cloneData.shift()
+            cloneLeftData.push(node)
+          }
+        }
+
         // 拿新数据重新绘制
-        newData.unshift(leftData.pop())
-        renderKLineChart(newData, config)
+        renderKLineChart(cloneData, config)
 
         // 记录插入数据时的光标位置
-        pointerPosition = offsetX
+        insertPosition = offsetX
       }
+
+      lastPosition = offsetX
     }, false);
 
     // 拖动结束时，隐藏draggable，否则辅助线出不来
