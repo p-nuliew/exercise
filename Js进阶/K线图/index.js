@@ -549,7 +549,7 @@ function renderKLineChart (
 
   // 拖拽
   function getDrag () {
-    console.log('getDrag: ');
+    console.warn('getDrag: ');
     // 新数据
     let cloneData = [...data]
     let cloneLeftData = [...leftData]
@@ -587,17 +587,17 @@ function renderKLineChart (
 
     /* 拖动目标元素时触发drag事件 */
     document.addEventListener("drag", function( event ) {
-      console.log('event: ', event);
       const { offsetX } = event
 
       // // 如果左侧数据全部显示完成，则不绘制
       if (cloneLeftData.length === 0) return
 
+      // TODO 不清楚小于0的场景,是被display: none的原因吗
+      // -offsetX = -(kWrapNode.style.left = padding.left)
+      if (offsetX < 0) return
+
       // 计算水平往右的拖动距离
       horizontalDragDistance = Math.abs(offsetX - insertPosition)
-      console.log('offsetX: ', offsetX);
-      // console.log('插入数据时的光标位置: ', insertPosition);
-      // console.log('12-------------拖动距离: ', horizontalDragDistance);
 
       // // 如果拖动距离大于x轴元素间距，则插入
       if ( horizontalDragDistance > xAxisItemSpace) {
@@ -636,13 +636,6 @@ function renderKLineChart (
 
     // 拖动结束时，隐藏draggable，否则辅助线出不来
     document.addEventListener("dragend", function( event ) {
-      // 水平拖动距离
-      horizontalDragDistance = 0
-      // 插入数据时的光标位置
-      insertPosition = 0
-      // 光标的上一个位置
-      lastPosition = ''
-
       const draggable = document.getElementById('draggable')
       draggable.style.display = 'none'
     }, false);
