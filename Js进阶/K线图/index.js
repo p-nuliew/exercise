@@ -422,37 +422,7 @@ function renderKLineChart (
     const xyAxisTipBoxWidth = padding.left
     const xyAxisTipBoxHeight = 20
 
-    // 鼠标按下时，显示拖拽元素
-    tipCanvas.addEventListener('mousedown', function (e) {
-      if (canDrag) {
-        //创建拖拽元素
-        const kWrapNode = document.getElementById('kWrap')
-        const draggableNode = document.getElementById('draggable')
-        console.log('draggableNode: ', draggableNode);
-
-        // 如果拖拽元素存在，则显示（避免重复创建）
-        if (draggableNode) {
-          draggableNode.style.display = 'block'
-          return
-        }
-
-        const div = document.createElement('div')
-
-        div.style.position = 'absolute'
-        div.style.zIndex = '10'
-        div.style.left = `${padding.left}px`
-        div.style.top = `${padding.top}px`
-        div.style.width = `${width - padding.left - padding.right}px`
-        div.style.height = `${height - padding.top - padding.bottom}px`
-        // div.style.background = 'yellow'
-
-        div.setAttribute('id', 'draggable')
-        div.setAttribute('draggable', 'true')
-
-        kWrapNode.appendChild(div)
-      }
-    }, false)
-
+    // 处理辅助线
     // 监听鼠标进入事件
     tipCanvas.addEventListener('mouseenter', function (e) {
       // 保存提示详情框的引用
@@ -495,9 +465,13 @@ function renderKLineChart (
       ctxTip.fillStyle = '#999'
       ctxTip.fill();
 
+      const yAxisLengthTranToPrice = len => {
+          // 每个像素占多少钱
+        const x = (maxPrice - minPrice) / yAxisHeight / contentRate
+        return (minPrice + len * x).toFixed(2)
+      }
       // 绘制y轴tip文字
-      const yAxisValue = ((yAxisHeight + padding.top - offsetY) / yAxisHeight * maxPrice).toFixed(2)
-      renderText(ctxTip, yAxisPointX - 30, offsetY, yAxisValue, 'left', '#fff')
+      renderText(ctxTip, yAxisPointX - 30, offsetY, yAxisLengthTranToPrice(yAxisOriginPointY - offsetY), 'left', '#fff')
 
 
       // 绘制x轴tip文字背景框
@@ -532,6 +506,42 @@ function renderKLineChart (
         tipDateEl = document.getElementById('tipDate')
         heightPriceEl = document.getElementById('heightPrice')
         lowPriceEl = document.getElementById('lowPrice')
+      }
+    }, false)
+
+
+    // 处理拖拽
+    // 鼠标按下时，显示拖拽元素在最上层
+    tipCanvas.addEventListener('mousedown', function (e) {
+      if (canDrag) {
+        //创建拖拽元素
+        const kWrapNode = document.getElementById('kWrap')
+        const draggableNode = document.getElementById('draggable')
+
+        // 如果拖拽元素存在，则显示（避免重复创建）
+        if (draggableNode) {
+          draggableNode.style.display = 'block'
+          return
+        }
+
+        const div = document.createElement('div')
+
+        div.style.position = 'absolute'
+        div.style.zIndex = '10'
+        div.style.left = `${padding.left}px`
+        div.style.top = `${padding.top}px`
+        div.style.width = `${width - padding.left - padding.right}px`
+        div.style.height = `${height - padding.top - padding.bottom}px`
+        div.setAttribute('id', 'draggable')
+        div.setAttribute('draggable', 'true')
+
+        kWrapNode.appendChild(div)
+
+        // 因为拖拽元素在最上层，所以 mouseup 事件要绑定在拖拽元素上，绑在 tipCanvas 上无效
+        // mouseup 时，隐蔽自己，否则提示画布出不来
+        div.addEventListener('mouseup', function(e) {
+          div.style.display = 'none'
+        })
       }
     }, false)
 
