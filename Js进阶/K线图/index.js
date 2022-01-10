@@ -48,6 +48,7 @@ if (canvas.getContext) {
     yAxisSplitNumber: 6,
     showTips: true,
     canDrag: true,
+    canScroll: true
   }
   renderKLineChart(data, config, init)
 }
@@ -80,7 +81,9 @@ function renderKLineChart (
     // 是否绘制辅助线
     showTips = false,
     // 是否可以拖拽
-    canDrag = false
+    canDrag = false,
+    // 是否可缩放
+    canScroll = false
   },
   init = false
 ) {
@@ -176,16 +179,20 @@ function renderKLineChart (
     renderLine(xAxisTickX, yAxisOriginPointY, xAxisTickX, yAxisOriginPointY + tickWidth)
   }
 
-  // 绘制一串蜡烛
-  renderCandles(dataYAxisPoint, candleW)
+
 
   // 绘制贝塞尔曲线
   renderBezierCurve(getControlPointInfo(curveType))
   console.log('绘制完成');
 
   if (init) {
+    // 绘制一串蜡烛
+    oneByOneRenderCandle(dataYAxisPoint, candleW)
     showTips && renderTipCanvas()
-    canDrag && getDrag()
+    canDrag && setDrag()
+    canScroll && setScroll()
+  } else {
+    renderCandles(dataYAxisPoint, candleW)
   }
 
   // 初始化完毕
@@ -214,55 +221,78 @@ function renderKLineChart (
   }
 
   /**
-   * 绘制一串蜡烛
+   * 绘制一串蜡烛（更新阶段）
    * @param {array} dataYAxisPoint 数据源
    * @param {number} candleW 蜡烛宽度
    */
   function renderCandles (dataYAxisPoint, candleW) {
+    for (let i = 0, candleLength = dataYAxisPoint.length; i < candleLength; i++) {
+      renderCandle(dataYAxisPoint[i], xAxisTickPointX(i), candleW)
+    }
+  }
+
+  /**
+   * 逐个渲染一串蜡烛（首次加载阶段）
+   */
+  function oneByOneRenderCandle (dataYAxisPoint, candleW) {
+    for(let i = 0, candleLength = dataYAxisPoint.length; i < candleLength; i++) {
+      (function(j) {
+        setTimeout(() => {
+          renderCandle(dataYAxisPoint[j], xAxisTickPointX(j), candleW)
+        }, j * 100)
+      }(i))
+    }
+  }
+
+  /**
+   * 绘制单个蜡烛
+   * @param {number} xAxisItemPointX 蜡烛横坐标
+   * @param {number} topPointY 顶点纵坐标
+   * @param {number} secondPointY 第二个点的纵坐标（实体的顶点坐标）
+   * @param {number} thirdPointY 第三个点的纵坐标（实体的底部坐标）
+   * @param {number} bottomPointY 底部纵坐标
+   * @param {number} candleW 蜡烛宽度
+   * @param {string} candleColor 蜡烛颜色
+   */
+  function renderCandle (dataItem, xAxisItemPointX, candleW) {
     const halfCandleW = candleW / 2
 
-    for (let i = 0, candleLength = dataYAxisPoint.length; i < candleLength; i++) {
-      const { heightPrice, lowPrice, openingPrice, closingPice } = dataYAxisPoint[i]
-      let
-        abscissa = xAxisTickPointX(i),
-        topPointY = heightPrice,
-        bottomPointY = lowPrice,
-        secondPointY,
-        thirdPointY,
-        candleColor
+    const { heightPrice, lowPrice, openingPrice, closingPice } = dataItem
+    let secondPointY = undefined;
+    let thirdPointY = undefined;
+    let candleColor = undefined;
 
-      if (closingPice < openingPrice) {
-        // 涨
-        candleColor = 'red'
-        secondPointY = closingPice
-        thirdPointY = openingPrice
-      } else {
-        candleColor = 'green'
-        secondPointY = openingPrice
-        thirdPointY = closingPice
-      }
-
-      // 绘制蜡烛上影线
-      ctx.beginPath()
-      ctx.moveTo(abscissa, topPointY)
-      ctx.lineTo(abscissa, secondPointY)
-      ctx.closePath();
-      ctx.stroke()
-
-      // 绘制蜡烛下影线
-      ctx.beginPath()
-      ctx.moveTo(abscissa, bottomPointY)
-      ctx.lineTo(abscissa, thirdPointY)
-      ctx.closePath();
-      ctx.stroke()
-
-      // 绘制蜡烛实体（绘制矩形）
-      ctx.beginPath()
-      ctx.moveTo(abscissa - halfCandleW, secondPointY)
-      ctx.rect(abscissa - halfCandleW, secondPointY, candleW, thirdPointY - secondPointY)
-      ctx.fillStyle = candleColor
-      ctx.fill();
+    if (closingPice < openingPrice) {
+      // 涨
+      candleColor = 'red'
+      secondPointY = closingPice
+      thirdPointY = openingPrice
+    } else {
+      candleColor = 'green'
+      secondPointY = openingPrice
+      thirdPointY = closingPice
     }
+
+    // 绘制蜡烛上影线
+    ctx.beginPath()
+    ctx.moveTo(xAxisItemPointX, heightPrice)
+    ctx.lineTo(xAxisItemPointX, secondPointY)
+    ctx.closePath();
+    ctx.stroke()
+
+    // 绘制蜡烛下影线
+    ctx.beginPath()
+    ctx.moveTo(xAxisItemPointX, lowPrice)
+    ctx.lineTo(xAxisItemPointX, thirdPointY)
+    ctx.closePath();
+    ctx.stroke()
+
+    // 绘制蜡烛实体（绘制矩形）
+    ctx.beginPath()
+    ctx.moveTo(xAxisItemPointX - halfCandleW, secondPointY)
+    ctx.rect(xAxisItemPointX - halfCandleW, secondPointY, candleW, thirdPointY - secondPointY)
+    ctx.fillStyle = candleColor
+    ctx.fill();
   }
 
    /**
@@ -431,6 +461,7 @@ function renderKLineChart (
 
     // 监听鼠标移动事件并绘制辅助线
     tipCanvas.addEventListener('mousemove', function (e) {
+      console.log('mousemove: ');
       // 鼠标距目标节点左上角的X坐标、Y坐标
       const { offsetX, offsetY } = e
       // 清除画布
@@ -486,6 +517,7 @@ function renderKLineChart (
 
       // 设置提示框元素的样式和内容
       const { date, heightPrice, lowPrice } = data[xTipIndex]
+      tipInfoEl.style.display = 'block'
       // 如果有子元素，说明已经插入，避免重复获取元素
       if (tipDateEl) {
         tipDateEl.innerText = date
@@ -499,14 +531,11 @@ function renderKLineChart (
           tipInfoEl.style.left = padding.left + xAxisWidth - tipInfoElWidth + 'px'
         }
       } else {
-        // 显示提示详情框
-        // 这里会偶现一直被执行
-        console.log('显示提示详情框');
-        tipInfoEl.style.display = 'block'
         tipDateEl = document.getElementById('tipDate')
         heightPriceEl = document.getElementById('heightPrice')
         lowPriceEl = document.getElementById('lowPrice')
       }
+
     }, false)
 
 
@@ -517,10 +546,12 @@ function renderKLineChart (
         //创建拖拽元素
         const kWrapNode = document.getElementById('kWrap')
         const draggableNode = document.getElementById('draggable')
+        console.log('draggableNode: ', draggableNode);
 
         // 如果拖拽元素存在，则显示（避免重复创建）
         if (draggableNode) {
           draggableNode.style.display = 'block'
+          draggableNode.style.cursor = 'grab'
           return
         }
 
@@ -532,6 +563,7 @@ function renderKLineChart (
         div.style.top = `${padding.top}px`
         div.style.width = `${width - padding.left - padding.right}px`
         div.style.height = `${height - padding.top - padding.bottom}px`
+        div.style.cursor = 'grab'
         div.setAttribute('id', 'draggable')
         div.setAttribute('draggable', 'true')
 
@@ -542,6 +574,7 @@ function renderKLineChart (
         div.addEventListener('mouseup', function(e) {
           div.style.display = 'none'
         })
+
       }
     }, false)
 
@@ -558,8 +591,8 @@ function renderKLineChart (
   }
 
   // 拖拽
-  function getDrag () {
-    console.warn('getDrag: ');
+  function setDrag () {
+    console.warn('setDrag: ');
     // 新数据
     let cloneData = [...data]
     let cloneLeftData = [...leftData]
@@ -571,8 +604,6 @@ function renderKLineChart (
     let insertPosition = 0
     // 光标的上一个位置
     let lastPosition = ''
-    // 拖动方向 左 or 右
-    let dragDirection = 'left'
 
     /* 拖动目标元素时触发drag事件 */
     document.addEventListener("dragstart", function( event ) {
@@ -594,31 +625,34 @@ function renderKLineChart (
       tipInfoEl.style.display = 'none'
     }, false);
 
-
     /* 拖动目标元素时触发drag事件 */
     document.addEventListener("drag", function( event ) {
+      console.log('drag: ');
       const { offsetX } = event
 
-      // // 如果左侧数据全部显示完成，则不绘制
-      if (cloneLeftData.length === 0) return
 
       // TODO 不清楚小于0的场景,是被display: none的原因吗
       // -offsetX = -(kWrapNode.style.left = padding.left)
       if (offsetX < 0) return
 
-      // 计算水平往右的拖动距离
+      // 计算水平拖动距离
       horizontalDragDistance = Math.abs(offsetX - insertPosition)
 
-      // // 如果拖动距离大于x轴元素间距，则插入
-      if ( horizontalDragDistance > xAxisItemSpace) {
-        // 清除画布并输入新数据重新绘制
-        ctx.clearRect(0, 0, width, height)
+      const draggableNode = document.getElementById('draggable')
+      console.log('draggableNode.style.: ', draggableNode.style.cursor);
 
+      draggableNode.style.cursor = 'grabbing'
+
+      // 如果拖动距离大于x轴元素间距，则插入
+      if ( horizontalDragDistance > xAxisItemSpace) {
         // 根据上一刻的光标位置，判断鼠标拖动方向，更新展示数据
         if (lastPosition !== offsetX) {
           if (lastPosition < offsetX) {
             console.log('右');
             dragDirection = 'right'
+
+            // // 如果左侧数据全部显示完成，则不绘制
+            if (cloneLeftData.length === 0) return
 
             const node = cloneLeftData.pop()
             cloneData.unshift(node)
@@ -627,6 +661,8 @@ function renderKLineChart (
           } else {
             dragDirection = 'left'
 
+            if (cloneRightData.length === 0) return
+
             const node = cloneRightData.shift()
             cloneData.push(node)
             cloneData.shift()
@@ -634,20 +670,52 @@ function renderKLineChart (
           }
         }
 
-        // 拿新数据重新绘制
-        renderKLineChart(cloneData, config)
-
         // 记录插入数据时的光标位置
         insertPosition = offsetX
+
+        // 清除画布并输入新数据重新绘制
+        ctx.clearRect(0, 0, width, height)
+
+        // 拿新数据重新绘制
+        renderKLineChart(cloneData, config)
       }
+
 
       lastPosition = offsetX
     }, false);
 
     // 拖动结束时，隐藏draggable，否则辅助线出不来
     document.addEventListener("dragend", function( event ) {
-      const draggable = document.getElementById('draggable')
-      draggable.style.display = 'none'
+      console.log('dragend: ');
+      const draggableNode = document.getElementById('draggable')
+      draggableNode.style.display = 'none'
+      draggableNode.style.cursor = 'default'
     }, false);
+  }
+
+  // 缩放
+  function setScroll () {
+    console.log('setScroll');
+
+    const kWrapNode = document.getElementById('kWrap')
+
+    // 监听滚轮事件（只考虑chrome）
+    // 如需兼容火狐和ie，参考 https://blog.csdn.net/u014205965/article/details/46045099
+    kWrapNode.addEventListener('wheel', function(e) {
+      console.log('e: ', e);
+      const { wheelDelta, detail, deltaY, deltaMode, wheelDeltaY } = e
+      console.log('wheelDelta, detail, deltaY, deltaMode, wheelDeltaY: ', wheelDelta, detail, deltaY, deltaMode, wheelDeltaY);
+
+      if (wheelDelta) {
+        if (wheelDelta > 0) {
+          // 滚轮向上滚动
+          console.log('滚轮向上滚动: ');
+
+        } else if (wheelDelta < 0) {
+          // 滚轮向上滚动
+          console.log('滚轮向下滚动: ');
+        }
+      }
+    }, false)
   }
 }
