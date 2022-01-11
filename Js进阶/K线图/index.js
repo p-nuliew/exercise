@@ -15,16 +15,16 @@ const leftData = [
   { date: '08-30', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
 ]
 const rightData = [
-  { date: '09-11', heightPrice: 1000, lowPrice: 500, openingPrice: 800, closingPice: 900 },
-  { date: '09-12', heightPrice: 990, lowPrice: 625, openingPrice: 800, closingPice: 700 },
-  { date: '09-13', heightPrice: 1000, lowPrice: 750, openingPrice: 800, closingPice: 900 },
-  { date: '09-14', heightPrice: 905, lowPrice: 625, openingPrice: 701, closingPice: 903 },
-  { date: '09-15', heightPrice: 1000, lowPrice: 550, openingPrice: 807, closingPice: 709 },
-  { date: '09-16', heightPrice: 1000, lowPrice: 800, openingPrice: 807, closingPice: 909 },
-  { date: '09-17', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
-  { date: '09-18', heightPrice: 1000, lowPrice: 600, openingPrice: 900, closingPice: 908 },
-  { date: '09-19', heightPrice: 904, lowPrice: 600, openingPrice: 701, closingPice: 803 },
-  { date: '09-20', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
+  { date: '09-21', heightPrice: 1000, lowPrice: 500, openingPrice: 800, closingPice: 900 },
+  { date: '09-22', heightPrice: 990, lowPrice: 625, openingPrice: 800, closingPice: 700 },
+  { date: '09-23', heightPrice: 1000, lowPrice: 750, openingPrice: 800, closingPice: 900 },
+  { date: '09-24', heightPrice: 905, lowPrice: 625, openingPrice: 701, closingPice: 903 },
+  { date: '09-25', heightPrice: 1000, lowPrice: 550, openingPrice: 807, closingPice: 709 },
+  { date: '09-26', heightPrice: 1000, lowPrice: 800, openingPrice: 807, closingPice: 909 },
+  { date: '09-27', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
+  { date: '09-28', heightPrice: 1000, lowPrice: 600, openingPrice: 900, closingPice: 908 },
+  { date: '09-29', heightPrice: 904, lowPrice: 600, openingPrice: 701, closingPice: 803 },
+  { date: '09-30', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
 ]
 
 // 最高价、最低价、开盘价、收盘价
@@ -39,6 +39,16 @@ const data = [
   { date: '09-08', heightPrice: 1000, lowPrice: 600, openingPrice: 900, closingPice: 908 },
   { date: '09-09', heightPrice: 904, lowPrice: 600, openingPrice: 701, closingPice: 803 },
   { date: '09-10', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
+  { date: '09-11', heightPrice: 1000, lowPrice: 510, openingPrice: 800, closingPice: 900 },
+  { date: '09-12', heightPrice: 1000, lowPrice: 510, openingPrice: 800, closingPice: 700 },
+  { date: '09-13', heightPrice: 1000, lowPrice: 400, openingPrice: 800, closingPice: 900 },
+  { date: '09-14', heightPrice: 905, lowPrice: 625, openingPrice: 701, closingPice: 903 },
+  { date: '09-15', heightPrice: 1000, lowPrice: 550, openingPrice: 807, closingPice: 709 },
+  { date: '09-16', heightPrice: 1000, lowPrice: 800, openingPrice: 807, closingPice: 909 },
+  { date: '09-17', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
+  { date: '09-18', heightPrice: 1000, lowPrice: 600, openingPrice: 900, closingPice: 908 },
+  { date: '09-19', heightPrice: 904, lowPrice: 600, openingPrice: 701, closingPice: 803 },
+  { date: '09-20', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
 ]
 
 if (canvas.getContext) {
@@ -115,6 +125,9 @@ function renderKLineChart (
   const xAxisWidth = width - yAxisPointX - padding.right
   // x轴元素间距
   const xAxisItemSpace = xAxisWidth/ xAxisItemLength
+  // x轴展示间隔数（不包括最后一个元素）
+  // 也就是余数，蜡烛数量越多，余数越大，刻度展示的数量越少
+  const remainder = Math.ceil(xAxisItemLength / 5)
   // 最高价
   const maxPrice = Math.max(...data.map(x => x.heightPrice))
   // 最低价（在最低价的基础上 - 50）
@@ -175,10 +188,12 @@ function renderKLineChart (
   // 绘制x轴刻度
   for (let i = 0; i < xAxisItemLength; i++) {
     const xAxisTickX = xAxisTickPointX(i)
-    renderText(ctx, xAxisTickX, yAxisOriginPointY + tickWidth + 10, seriesData[i], 'center', '#FF0000')
-    renderLine(xAxisTickX, yAxisOriginPointY, xAxisTickX, yAxisOriginPointY + tickWidth)
-  }
 
+    if (i % remainder === 0 || i === xAxisItemLength - 1) {
+      renderText(ctx, xAxisTickX, yAxisOriginPointY + tickWidth + 10, seriesData[i], 'center', '#FF0000')
+      renderLine(xAxisTickX, yAxisOriginPointY, xAxisTickX, yAxisOriginPointY + tickWidth)
+    }
+  }
 
 
   // 绘制贝塞尔曲线
