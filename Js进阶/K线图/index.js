@@ -15,16 +15,26 @@ const leftData = [
   { date: '08-30', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
 ]
 const rightData = [
-  { date: '09-21', heightPrice: 1000, lowPrice: 500, openingPrice: 800, closingPice: 900 },
-  { date: '09-22', heightPrice: 990, lowPrice: 625, openingPrice: 800, closingPice: 700 },
-  { date: '09-23', heightPrice: 1000, lowPrice: 750, openingPrice: 800, closingPice: 900 },
-  { date: '09-24', heightPrice: 905, lowPrice: 625, openingPrice: 701, closingPice: 903 },
-  { date: '09-25', heightPrice: 1000, lowPrice: 550, openingPrice: 807, closingPice: 709 },
-  { date: '09-26', heightPrice: 1000, lowPrice: 800, openingPrice: 807, closingPice: 909 },
-  { date: '09-27', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
-  { date: '09-28', heightPrice: 1000, lowPrice: 600, openingPrice: 900, closingPice: 908 },
-  { date: '09-29', heightPrice: 904, lowPrice: 600, openingPrice: 701, closingPice: 803 },
-  { date: '09-30', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
+  // { date: '09-21', heightPrice: 1000, lowPrice: 500, openingPrice: 800, closingPice: 900 },
+  // { date: '09-22', heightPrice: 990, lowPrice: 625, openingPrice: 800, closingPice: 700 },
+  // { date: '09-23', heightPrice: 1000, lowPrice: 750, openingPrice: 800, closingPice: 900 },
+  // { date: '09-24', heightPrice: 905, lowPrice: 625, openingPrice: 701, closingPice: 903 },
+  // { date: '09-25', heightPrice: 1000, lowPrice: 550, openingPrice: 807, closingPice: 709 },
+  // { date: '09-26', heightPrice: 1000, lowPrice: 800, openingPrice: 807, closingPice: 909 },
+  // { date: '09-27', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
+  // { date: '09-28', heightPrice: 1000, lowPrice: 600, openingPrice: 900, closingPice: 908 },
+  // { date: '09-29', heightPrice: 904, lowPrice: 600, openingPrice: 701, closingPice: 803 },
+  // { date: '09-30', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
+  { date: '09-11', heightPrice: 1000, lowPrice: 510, openingPrice: 800, closingPice: 900 },
+  { date: '09-12', heightPrice: 1000, lowPrice: 510, openingPrice: 800, closingPice: 700 },
+  { date: '09-13', heightPrice: 1000, lowPrice: 400, openingPrice: 800, closingPice: 900 },
+  { date: '09-14', heightPrice: 905, lowPrice: 625, openingPrice: 701, closingPice: 903 },
+  { date: '09-15', heightPrice: 1000, lowPrice: 550, openingPrice: 807, closingPice: 709 },
+  { date: '09-16', heightPrice: 1000, lowPrice: 800, openingPrice: 807, closingPice: 909 },
+  { date: '09-17', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
+  { date: '09-18', heightPrice: 1000, lowPrice: 600, openingPrice: 900, closingPice: 908 },
+  { date: '09-19', heightPrice: 904, lowPrice: 600, openingPrice: 701, closingPice: 803 },
+  { date: '09-20', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
 ]
 
 // 最高价、最低价、开盘价、收盘价
@@ -39,16 +49,6 @@ const data = [
   { date: '09-08', heightPrice: 1000, lowPrice: 600, openingPrice: 900, closingPice: 908 },
   { date: '09-09', heightPrice: 904, lowPrice: 600, openingPrice: 701, closingPice: 803 },
   { date: '09-10', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
-  { date: '09-11', heightPrice: 1000, lowPrice: 510, openingPrice: 800, closingPice: 900 },
-  { date: '09-12', heightPrice: 1000, lowPrice: 510, openingPrice: 800, closingPice: 700 },
-  { date: '09-13', heightPrice: 1000, lowPrice: 400, openingPrice: 800, closingPice: 900 },
-  { date: '09-14', heightPrice: 905, lowPrice: 625, openingPrice: 701, closingPice: 903 },
-  { date: '09-15', heightPrice: 1000, lowPrice: 550, openingPrice: 807, closingPice: 709 },
-  { date: '09-16', heightPrice: 1000, lowPrice: 800, openingPrice: 807, closingPice: 909 },
-  { date: '09-17', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
-  { date: '09-18', heightPrice: 1000, lowPrice: 600, openingPrice: 900, closingPice: 908 },
-  { date: '09-19', heightPrice: 904, lowPrice: 600, openingPrice: 701, closingPice: 803 },
-  { date: '09-20', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
 ]
 
 if (canvas.getContext) {
@@ -134,6 +134,10 @@ function renderKLineChart (
   const minPrice = Math.min(...data.map(x => x.lowPrice)) - 50
   // 坐标系内容高度占坐标系高度的比例
   const contentRate = 0.9 || 1
+
+  let cloneData = [...data]
+  let cloneLeftData = [...leftData]
+  let cloneRightData = [...rightData]
 
   // 纵坐标集合
   const dataYAxisPoint = data.map(it => {
@@ -608,10 +612,6 @@ function renderKLineChart (
   // 拖拽
   function setDrag () {
     console.warn('setDrag: ');
-    // 新数据
-    let cloneData = [...data]
-    let cloneLeftData = [...leftData]
-    let cloneRightData = [...rightData]
 
     // 水平拖动距离
     let horizontalDragDistance = 0
@@ -717,20 +717,50 @@ function renderKLineChart (
     // 监听滚轮事件（只考虑chrome）
     // 如需兼容火狐和ie，参考 https://blog.csdn.net/u014205965/article/details/46045099
     kWrapNode.addEventListener('wheel', function(e) {
-      console.log('e: ', e);
-      const { wheelDelta, detail, deltaY, deltaMode, wheelDeltaY } = e
-      console.log('wheelDelta, detail, deltaY, deltaMode, wheelDeltaY: ', wheelDelta, detail, deltaY, deltaMode, wheelDeltaY);
+      const { deltaX, deltaY, ctrlKey } = e
+      // 方向判断
+      if (Math.abs(deltaX) !== 0 && Math.abs(deltaY) !== 0) return console.log('没有固定方向');
+      if (deltaX < 0) return console.log('向右');
+      if (deltaX > 0) return console.log('向左');
 
-      if (wheelDelta) {
-        if (wheelDelta > 0) {
-          // 滚轮向上滚动
-          console.log('滚轮向上滚动: ');
+      if (ctrlKey) {
+          if (deltaY > 0) {
+            console.log('向内');
+            // 最小展示条数
+            if (cloneData.length <= 10) return
 
-        } else if (wheelDelta < 0) {
-          // 滚轮向上滚动
-          console.log('滚轮向下滚动: ');
-        }
+            // 处理数据
+            cloneLeftData.push(cloneData.shift())
+            cloneRightData.unshift(cloneData.pop())
+          }
+          if (deltaY < 0) {
+            console.log('向外');
+            // 最多展示条数
+            if (cloneData.length >= 20) return
+
+            cloneData = [cloneLeftData.pop(), ...cloneData, cloneRightData.shift()]
+          }
+      } else {
+          if (deltaY > 0) {
+            console.log('向下');
+            // 最小展示条数
+            if (cloneData.length <= 10) return
+
+            // 处理数据
+            cloneLeftData.push(cloneData.shift())
+            cloneRightData.unshift(cloneData.pop())
+          };
+          if (deltaY < 0) {
+            console.log('向上')
+            // 最多展示条数
+            if (cloneData.length >= 20) return
+
+            cloneData = [cloneLeftData.pop(), ...cloneData, cloneRightData.shift()]
+          }
       }
+
+      ctx.clearRect(0, 0, width, height)
+      renderKLineChart(cloneData, config)
     }, false)
   }
 }
