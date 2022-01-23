@@ -26,7 +26,7 @@ const rightData = [
   // { date: '09-29', heightPrice: 904, lowPrice: 600, openingPrice: 701, closingPice: 803 },
   // { date: '09-30', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
   { date: '09-11', heightPrice: 1000, lowPrice: 510, openingPrice: 800, closingPice: 900 },
-  { date: '09-12', heightPrice: 1000, lowPrice: 510, openingPrice: 800, closingPice: 700 },
+  { date: '09-12', heightPrice: 1400, lowPrice: 510, openingPrice: 800, closingPice: 700 },
   { date: '09-13', heightPrice: 1000, lowPrice: 400, openingPrice: 800, closingPice: 900 },
   { date: '09-14', heightPrice: 905, lowPrice: 625, openingPrice: 701, closingPice: 903 },
   { date: '09-15', heightPrice: 1000, lowPrice: 550, openingPrice: 807, closingPice: 709 },
@@ -93,11 +93,19 @@ function renderKLineChart (
     // 是否可以拖拽
     canDrag = false,
     // 是否可缩放
-    canScroll = false
+    canScroll = false,
+    // 最多展示多少条数据
+    maxShow = 20,
+    // 最少展示多少条数据
+    minShow = 10,
   },
   init = false
 ) {
   console.log('开始绘制k线图:', data);
+
+  let cloneData = [...data]
+  let cloneLeftData = [...leftData]
+  let cloneRightData = [...rightData]
 
   // 已知条件
   // 容器宽度
@@ -105,7 +113,8 @@ function renderKLineChart (
   // 容器高度
   const height = ctx.canvas.height
   // x轴元素数量
-  const xAxisItemLength = data.length
+  const xAxisItemLength = cloneData.length
+  console.log('--------------xAxisItemLength: ', xAxisItemLength);
   const config = arguments[1]
 
   // 可知条件
@@ -124,23 +133,21 @@ function renderKLineChart (
   // x轴宽度
   const xAxisWidth = width - yAxisPointX - padding.right
   // x轴元素间距
-  const xAxisItemSpace = xAxisWidth/ xAxisItemLength
+  const xAxisItemSpace = xAxisWidth / xAxisItemLength
   // x轴展示间隔数（不包括最后一个元素）
   // 也就是余数，蜡烛数量越多，余数越大，刻度展示的数量越少
   const remainder = Math.ceil(xAxisItemLength / 5)
   // 最高价
-  const maxPrice = Math.max(...data.map(x => x.heightPrice))
+  const maxPrice = Math.max(...cloneData.map(x => x.heightPrice))
   // 最低价（在最低价的基础上 - 50）
-  const minPrice = Math.min(...data.map(x => x.lowPrice)) - 50
+  const minPrice = Math.min(...cloneData.map(x => x.lowPrice)) - 50
   // 坐标系内容高度占坐标系高度的比例
   const contentRate = 0.9 || 1
 
-  let cloneData = [...data]
-  let cloneLeftData = [...leftData]
-  let cloneRightData = [...rightData]
+
 
   // 纵坐标集合
-  const dataYAxisPoint = data.map(it => {
+  const dataYAxisPoint = cloneData.map(it => {
     const newIt = {}
     for (key in it) {
       if (key === 'date') continue
@@ -149,7 +156,8 @@ function renderKLineChart (
     return newIt
   })
 
-  const seriesData = data.map(it => it.date)
+  // TODO 优化
+  const seriesData = cloneData.map((x) => x.date)
 
   // 绘制Y轴
   ctx.beginPath()
@@ -194,7 +202,7 @@ function renderKLineChart (
     const xAxisTickX = xAxisTickPointX(i)
 
     if (i % remainder === 0 || i === xAxisItemLength - 1) {
-      renderText(ctx, xAxisTickX, yAxisOriginPointY + tickWidth + 10, seriesData[i], 'center', '#FF0000')
+      renderText(ctx, xAxisTickX, yAxisOriginPointY + tickWidth + 10, cloneData.map((x) => x.date)[i], 'center', '#FF0000')
       renderLine(xAxisTickX, yAxisOriginPointY, xAxisTickX, yAxisOriginPointY + tickWidth)
     }
   }
@@ -207,6 +215,7 @@ function renderKLineChart (
   if (init) {
     // 绘制一串蜡烛
     oneByOneRenderCandle(dataYAxisPoint, candleW)
+    // TODO 这里只绘制一遍，注意函数里的参数不会实时刷新
     showTips && renderTipCanvas()
     canDrag && setDrag()
     canScroll && setScroll()
@@ -531,11 +540,14 @@ function renderKLineChart (
       ctxTip.fill();
 
       // 绘制x轴tip文字
-      const xTipIndex = Math.round((offsetX - yAxisPointX) / xAxisWidth* xAxisItemLength)
-      renderText(ctxTip, offsetX, yAxisOriginPointY + xyAxisTipBoxHeight / 2, seriesData[xTipIndex] || '', 'center', '#fff')
+      // TODO todo
+      const xTipIndex = Math.round((offsetX - yAxisPointX) / xAxisWidth * xAxisItemLength)
+      // console.log('xAxisItemLength: ', xAxisItemLength);
+      renderText(ctxTip, offsetX, yAxisOriginPointY + xyAxisTipBoxHeight / 2, cloneData.map((x) => x.date)[xTipIndex] || '', 'center', '#fff')
+      // console.log('cloneData: ', cloneData);
 
       // 设置提示框元素的样式和内容
-      const { date, heightPrice, lowPrice } = data[xTipIndex]
+      const { date, heightPrice, lowPrice } = cloneData[xTipIndex]
       tipInfoEl.style.display = 'block'
       // 如果有子元素，说明已经插入，避免重复获取元素
       if (tipDateEl) {
@@ -657,31 +669,27 @@ function renderKLineChart (
       console.log('draggableNode.style.: ', draggableNode.style.cursor);
 
       draggableNode.style.cursor = 'grabbing'
+      console.log(cloneLeftData, cloneData, cloneRightData);
 
       // 如果拖动距离大于x轴元素间距，则插入
       if ( horizontalDragDistance > xAxisItemSpace) {
         // 根据上一刻的光标位置，判断鼠标拖动方向，更新展示数据
         if (lastPosition !== offsetX) {
+          // 往右拖动
           if (lastPosition < offsetX) {
-            console.log('右');
             dragDirection = 'right'
-
-            // // 如果左侧数据全部显示完成，则不绘制
+            // 如果左侧数据全部显示完成，则不绘制
             if (cloneLeftData.length === 0) return
 
-            const node = cloneLeftData.pop()
-            cloneData.unshift(node)
-            cloneData.pop()
-            cloneRightData.unshift(node)
+            cloneData.unshift(cloneLeftData.pop())
+            cloneRightData.unshift(cloneData.pop())
           } else {
+            // 往左拖动
             dragDirection = 'left'
-
             if (cloneRightData.length === 0) return
 
-            const node = cloneRightData.shift()
-            cloneData.push(node)
-            cloneData.shift()
-            cloneLeftData.push(node)
+            cloneData.push(cloneRightData.shift())
+            cloneLeftData.push(cloneData.shift())
           }
         }
 
@@ -694,7 +702,6 @@ function renderKLineChart (
         // 拿新数据重新绘制
         renderKLineChart(cloneData, config)
       }
-
 
       lastPosition = offsetX
     }, false);
@@ -710,14 +717,13 @@ function renderKLineChart (
 
   // 缩放
   function setScroll () {
-    console.log('setScroll');
-
     const kWrapNode = document.getElementById('kWrap')
 
     // 监听滚轮事件（只考虑chrome）
     // 如需兼容火狐和ie，参考 https://blog.csdn.net/u014205965/article/details/46045099
     kWrapNode.addEventListener('wheel', function(e) {
       const { deltaX, deltaY, ctrlKey } = e
+
       // 方向判断
       if (Math.abs(deltaX) !== 0 && Math.abs(deltaY) !== 0) return console.log('没有固定方向');
       if (deltaX < 0) return console.log('向右');
