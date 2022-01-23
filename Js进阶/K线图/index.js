@@ -15,16 +15,6 @@ const leftData = [
   { date: '08-30', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
 ]
 const rightData = [
-  // { date: '09-21', heightPrice: 1000, lowPrice: 500, openingPrice: 800, closingPice: 900 },
-  // { date: '09-22', heightPrice: 990, lowPrice: 625, openingPrice: 800, closingPice: 700 },
-  // { date: '09-23', heightPrice: 1000, lowPrice: 750, openingPrice: 800, closingPice: 900 },
-  // { date: '09-24', heightPrice: 905, lowPrice: 625, openingPrice: 701, closingPice: 903 },
-  // { date: '09-25', heightPrice: 1000, lowPrice: 550, openingPrice: 807, closingPice: 709 },
-  // { date: '09-26', heightPrice: 1000, lowPrice: 800, openingPrice: 807, closingPice: 909 },
-  // { date: '09-27', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
-  // { date: '09-28', heightPrice: 1000, lowPrice: 600, openingPrice: 900, closingPice: 908 },
-  // { date: '09-29', heightPrice: 904, lowPrice: 600, openingPrice: 701, closingPice: 803 },
-  // { date: '09-30', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
   { date: '09-11', heightPrice: 1000, lowPrice: 510, openingPrice: 800, closingPice: 900 },
   { date: '09-12', heightPrice: 1400, lowPrice: 510, openingPrice: 800, closingPice: 700 },
   { date: '09-13', heightPrice: 1000, lowPrice: 400, openingPrice: 800, closingPice: 900 },
@@ -102,7 +92,7 @@ function renderKLineChart (
   init = false
 ) {
   console.log('开始绘制k线图:', data);
-
+  //
   let cloneData = [...data]
   let cloneLeftData = [...leftData]
   let cloneRightData = [...rightData]
@@ -114,7 +104,6 @@ function renderKLineChart (
   const height = ctx.canvas.height
   // x轴元素数量
   const xAxisItemLength = cloneData.length
-  console.log('--------------xAxisItemLength: ', xAxisItemLength);
   const config = arguments[1]
 
   // 可知条件
@@ -144,8 +133,6 @@ function renderKLineChart (
   // 坐标系内容高度占坐标系高度的比例
   const contentRate = 0.9 || 1
 
-
-
   // 纵坐标集合
   const dataYAxisPoint = cloneData.map(it => {
     const newIt = {}
@@ -155,9 +142,6 @@ function renderKLineChart (
     }
     return newIt
   })
-
-  // TODO 优化
-  const seriesData = cloneData.map((x) => x.date)
 
   // 绘制Y轴
   ctx.beginPath()
@@ -197,10 +181,11 @@ function renderKLineChart (
     renderLine(sx, y, ex, y)
   }
 
-  // 绘制x轴刻度
+  // 绘制x轴刻度与文字
   for (let i = 0; i < xAxisItemLength; i++) {
     const xAxisTickX = xAxisTickPointX(i)
 
+    // 隔点展示
     if (i % remainder === 0 || i === xAxisItemLength - 1) {
       renderText(ctx, xAxisTickX, yAxisOriginPointY + tickWidth + 10, cloneData.map((x) => x.date)[i], 'center', '#FF0000')
       renderLine(xAxisTickX, yAxisOriginPointY, xAxisTickX, yAxisOriginPointY + tickWidth)
@@ -215,7 +200,6 @@ function renderKLineChart (
   if (init) {
     // 绘制一串蜡烛
     oneByOneRenderCandle(dataYAxisPoint, candleW)
-    // TODO 这里只绘制一遍，注意函数里的参数不会实时刷新
     showTips && renderTipCanvas()
     canDrag && setDrag()
     canScroll && setScroll()
@@ -489,7 +473,6 @@ function renderKLineChart (
 
     // 监听鼠标移动事件并绘制辅助线
     tipCanvas.addEventListener('mousemove', function (e) {
-      console.log('mousemove: ');
       // 鼠标距目标节点左上角的X坐标、Y坐标
       const { offsetX, offsetY } = e
       // 清除画布
@@ -540,11 +523,9 @@ function renderKLineChart (
       ctxTip.fill();
 
       // 绘制x轴tip文字
-      // TODO todo
-      const xTipIndex = Math.round((offsetX - yAxisPointX) / xAxisWidth * xAxisItemLength)
-      // console.log('xAxisItemLength: ', xAxisItemLength);
+      // 获取x轴元素在x轴上的下标
+      const xTipIndex = Math.round((offsetX - yAxisPointX) / xAxisWidth * xAxisItemLength / (data.length / cloneData.length))
       renderText(ctxTip, offsetX, yAxisOriginPointY + xyAxisTipBoxHeight / 2, cloneData.map((x) => x.date)[xTipIndex] || '', 'center', '#fff')
-      // console.log('cloneData: ', cloneData);
 
       // 设置提示框元素的样式和内容
       const { date, heightPrice, lowPrice } = cloneData[xTipIndex]
@@ -566,7 +547,6 @@ function renderKLineChart (
         heightPriceEl = document.getElementById('heightPrice')
         lowPriceEl = document.getElementById('lowPrice')
       }
-
     }, false)
 
 
@@ -577,7 +557,6 @@ function renderKLineChart (
         //创建拖拽元素
         const kWrapNode = document.getElementById('kWrap')
         const draggableNode = document.getElementById('draggable')
-        console.log('draggableNode: ', draggableNode);
 
         // 如果拖拽元素存在，则显示（避免重复创建）
         if (draggableNode) {
@@ -614,7 +593,7 @@ function renderKLineChart (
       const { offsetX, offsetY } = e
 
       return  offsetX > yAxisPointX &&
-              offsetX < width - padding.right - xAxisWidth / xAxisItemLength &&
+              offsetX < width - padding.right - xAxisWidth / xAxisItemLength * (data.length / cloneData.length) &&
               offsetY > padding.top &&
               offsetY < yAxisOriginPointY
     }
@@ -623,8 +602,6 @@ function renderKLineChart (
 
   // 拖拽
   function setDrag () {
-    console.warn('setDrag: ');
-
     // 水平拖动距离
     let horizontalDragDistance = 0
     // 插入数据时的光标位置
@@ -634,7 +611,6 @@ function renderKLineChart (
 
     /* 拖动目标元素时触发drag事件 */
     document.addEventListener("dragstart", function( event ) {
-      console.log('dragstart: ');
       // 清除提示画布并隐藏提示详情框
       const tipCanvas = document.getElementById('tipCanvas');
       const ctxTip = tipCanvas.getContext('2d');
@@ -654,22 +630,16 @@ function renderKLineChart (
 
     /* 拖动目标元素时触发drag事件 */
     document.addEventListener("drag", function( event ) {
-      console.log('drag: ');
       const { offsetX } = event
 
-
-      // TODO 不清楚小于0的场景,是被display: none的原因吗
-      // -offsetX = -(kWrapNode.style.left = padding.left)
+      // TODO 不清楚小于0的场景,是被display: none的原因吗??
       if (offsetX < 0) return
 
       // 计算水平拖动距离
       horizontalDragDistance = Math.abs(offsetX - insertPosition)
 
       const draggableNode = document.getElementById('draggable')
-      console.log('draggableNode.style.: ', draggableNode.style.cursor);
-
       draggableNode.style.cursor = 'grabbing'
-      console.log(cloneLeftData, cloneData, cloneRightData);
 
       // 如果拖动距离大于x轴元素间距，则插入
       if ( horizontalDragDistance > xAxisItemSpace) {
@@ -708,7 +678,6 @@ function renderKLineChart (
 
     // 拖动结束时，隐藏draggable，否则辅助线出不来
     document.addEventListener("dragend", function( event ) {
-      console.log('dragend: ');
       const draggableNode = document.getElementById('draggable')
       draggableNode.style.display = 'none'
       draggableNode.style.cursor = 'default'
@@ -729,40 +698,21 @@ function renderKLineChart (
       if (deltaX < 0) return console.log('向右');
       if (deltaX > 0) return console.log('向左');
 
-      if (ctrlKey) {
-          if (deltaY > 0) {
-            console.log('向内');
-            // 最小展示条数
-            if (cloneData.length <= 10) return
+      if (deltaY > 0) {
+        console.log('向下');
+        // 最小展示条数
+        if (cloneData.length <= minShow) return
 
-            // 处理数据
-            cloneLeftData.push(cloneData.shift())
-            cloneRightData.unshift(cloneData.pop())
-          }
-          if (deltaY < 0) {
-            console.log('向外');
-            // 最多展示条数
-            if (cloneData.length >= 20) return
+        // 处理数据
+        cloneLeftData.push(cloneData.shift())
+        cloneRightData.unshift(cloneData.pop())
+      };
+      if (deltaY < 0) {
+        console.log('向上')
+        // 最多展示条数
+        if (cloneData.length >= maxShow) return
 
-            cloneData = [cloneLeftData.pop(), ...cloneData, cloneRightData.shift()]
-          }
-      } else {
-          if (deltaY > 0) {
-            console.log('向下');
-            // 最小展示条数
-            if (cloneData.length <= 10) return
-
-            // 处理数据
-            cloneLeftData.push(cloneData.shift())
-            cloneRightData.unshift(cloneData.pop())
-          };
-          if (deltaY < 0) {
-            console.log('向上')
-            // 最多展示条数
-            if (cloneData.length >= 20) return
-
-            cloneData = [cloneLeftData.pop(), ...cloneData, cloneRightData.shift()]
-          }
+        cloneData = [cloneLeftData.pop(), ...cloneData, cloneRightData.shift()]
       }
 
       ctx.clearRect(0, 0, width, height)
