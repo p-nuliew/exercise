@@ -131,7 +131,7 @@ function renderKLineChart (
   // 最低价（在最低价的基础上 - 50）
   const minPrice = Math.min(...cloneData.map(x => x.lowPrice)) - 50
   // 坐标系内容高度占坐标系高度的比例
-  const contentRate = 0.9 || 1
+  const contentHeightRate = 0.9 || 1
 
   // 纵坐标集合
   const dataYAxisPoint = cloneData.map(it => {
@@ -175,7 +175,7 @@ function renderKLineChart (
   for (let i = 0; i < yAxisSplitNumber; i++) {
     let sx = yAxisPointX
         ex = yAxisPointX + tickWidth
-        y = yAxisOriginPointY - yAxisTickSpace * i * contentRate
+        y = yAxisOriginPointY - yAxisTickSpace * i * contentHeightRate
 
     renderText(ctx, sx - 10, y, yAxisTickText(i), 'right', '#FF0000')
     renderLine(sx, y, ex, y)
@@ -218,7 +218,7 @@ function renderKLineChart (
   // 实际价格转为canvas纵坐标
   function tranPriceToOrdinate (price) {
     // 每块钱占自定义坐标系的高度
-    const rate = yAxisHeight / (maxPrice - minPrice) * contentRate
+    const rate = yAxisHeight / (maxPrice - minPrice) * contentHeightRate
     // 当前价格占自定义坐标系的高度
     const h = rate *  (price - minPrice)
 
@@ -509,7 +509,7 @@ function renderKLineChart (
 
       const yAxisLengthTranToPrice = len => {
           // 每个像素占多少钱
-        const x = (maxPrice - minPrice) / yAxisHeight / contentRate
+        const x = (maxPrice - minPrice) / yAxisHeight / contentHeightRate
         return (minPrice + len * x).toFixed(2)
       }
       // 绘制y轴tip文字
