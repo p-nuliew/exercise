@@ -2,64 +2,64 @@
 const canvas = document.getElementById('canvas');
 canvas.style.background = '#e8e8e8'
 
-const leftData = [
-  { date: '08-21', heightPrice: 1200, lowPrice: 580, openingPrice: 860, closingPice: 980 },
-  { date: '08-22', heightPrice: 1500, lowPrice: 625, openingPrice: 800, closingPice: 700 },
-  { date: '08-23', heightPrice: 1000, lowPrice: 750, openingPrice: 800, closingPice: 900 },
-  { date: '08-24', heightPrice: 905, lowPrice: 625, openingPrice: 701, closingPice: 903 },
-  { date: '08-25', heightPrice: 1000, lowPrice: 550, openingPrice: 807, closingPice: 789 },
-  { date: '08-26', heightPrice: 1000, lowPrice: 300, openingPrice: 607, closingPice: 989 },
-  { date: '08-27', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
-  { date: '08-28', heightPrice: 1000, lowPrice: 400, openingPrice: 900, closingPice: 908 },
-  { date: '08-29', heightPrice: 904, lowPrice: 680, openingPrice: 701, closingPice: 883 },
-  { date: '08-30', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
-]
-const rightData = [
-  { date: '09-11', heightPrice: 1000, lowPrice: 510, openingPrice: 800, closingPice: 900 },
-  { date: '09-12', heightPrice: 1400, lowPrice: 510, openingPrice: 800, closingPice: 700 },
-  { date: '09-13', heightPrice: 1000, lowPrice: 400, openingPrice: 800, closingPice: 900 },
-  { date: '09-14', heightPrice: 905, lowPrice: 625, openingPrice: 701, closingPice: 903 },
-  { date: '09-15', heightPrice: 1000, lowPrice: 550, openingPrice: 807, closingPice: 709 },
-  { date: '09-16', heightPrice: 1000, lowPrice: 800, openingPrice: 807, closingPice: 909 },
-  { date: '09-17', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
-  { date: '09-18', heightPrice: 1000, lowPrice: 600, openingPrice: 900, closingPice: 908 },
-  { date: '09-19', heightPrice: 904, lowPrice: 600, openingPrice: 701, closingPice: 803 },
-  { date: '09-20', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
-]
-
-// 最高价、最低价、开盘价、收盘价
-const data = [
-  { date: '09-01', heightPrice: 1000, lowPrice: 510, openingPrice: 800, closingPice: 900 },
-  { date: '09-02', heightPrice: 1000, lowPrice: 510, openingPrice: 800, closingPice: 700 },
-  { date: '09-03', heightPrice: 1000, lowPrice: 400, openingPrice: 800, closingPice: 900 },
-  { date: '09-04', heightPrice: 905, lowPrice: 625, openingPrice: 701, closingPice: 903 },
-  { date: '09-05', heightPrice: 1000, lowPrice: 550, openingPrice: 807, closingPice: 709 },
-  { date: '09-06', heightPrice: 1000, lowPrice: 800, openingPrice: 807, closingPice: 909 },
-  { date: '09-07', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
-  { date: '09-08', heightPrice: 1000, lowPrice: 600, openingPrice: 900, closingPice: 908 },
-  { date: '09-09', heightPrice: 904, lowPrice: 600, openingPrice: 701, closingPice: 803 },
-  { date: '09-10', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
-]
-
 if (canvas.getContext) {
   ctx = canvas.getContext('2d');
   let init = true
-  const config = {
+  const configProps = {
     yAxisSplitNumber: 6,
     showTips: true,
     canDrag: true,
     canScroll: true
   }
-  renderKLineChart(data, config, init)
+  // 默认一页展示10条数据，预准备好左右侧的数据，也就是30个数据
+  const dataSource = {
+    leftData: [
+      { date: '08-21', heightPrice: 1200, lowPrice: 580, openingPrice: 860, closingPice: 980 },
+      { date: '08-22', heightPrice: 1500, lowPrice: 625, openingPrice: 800, closingPice: 700 },
+      { date: '08-23', heightPrice: 1000, lowPrice: 750, openingPrice: 800, closingPice: 900 },
+      { date: '08-24', heightPrice: 905, lowPrice: 625, openingPrice: 701, closingPice: 903 },
+      { date: '08-25', heightPrice: 1000, lowPrice: 550, openingPrice: 807, closingPice: 789 },
+      { date: '08-26', heightPrice: 1000, lowPrice: 300, openingPrice: 607, closingPice: 989 },
+      { date: '08-27', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
+      { date: '08-28', heightPrice: 1000, lowPrice: 400, openingPrice: 900, closingPice: 908 },
+      { date: '08-29', heightPrice: 904, lowPrice: 680, openingPrice: 701, closingPice: 883 },
+      { date: '08-30', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
+    ],
+    data: [
+      { date: '09-01', heightPrice: 1000, lowPrice: 510, openingPrice: 800, closingPice: 900 },
+      { date: '09-02', heightPrice: 1000, lowPrice: 510, openingPrice: 800, closingPice: 700 },
+      { date: '09-03', heightPrice: 1000, lowPrice: 400, openingPrice: 800, closingPice: 900 },
+      { date: '09-04', heightPrice: 905, lowPrice: 625, openingPrice: 701, closingPice: 903 },
+      { date: '09-05', heightPrice: 1000, lowPrice: 550, openingPrice: 807, closingPice: 709 },
+      { date: '09-06', heightPrice: 1000, lowPrice: 800, openingPrice: 807, closingPice: 909 },
+      { date: '09-07', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
+      { date: '09-08', heightPrice: 1000, lowPrice: 600, openingPrice: 900, closingPice: 908 },
+      { date: '09-09', heightPrice: 904, lowPrice: 600, openingPrice: 701, closingPice: 803 },
+      { date: '09-10', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
+    ],
+    rightData: [
+      { date: '09-11', heightPrice: 1000, lowPrice: 510, openingPrice: 800, closingPice: 900 },
+      { date: '09-12', heightPrice: 1400, lowPrice: 510, openingPrice: 800, closingPice: 700 },
+      { date: '09-13', heightPrice: 1000, lowPrice: 400, openingPrice: 800, closingPice: 900 },
+      { date: '09-14', heightPrice: 905, lowPrice: 625, openingPrice: 701, closingPice: 903 },
+      { date: '09-15', heightPrice: 1000, lowPrice: 550, openingPrice: 807, closingPice: 709 },
+      { date: '09-16', heightPrice: 1000, lowPrice: 800, openingPrice: 807, closingPice: 909 },
+      { date: '09-17', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
+      { date: '09-18', heightPrice: 1000, lowPrice: 600, openingPrice: 900, closingPice: 908 },
+      { date: '09-19', heightPrice: 904, lowPrice: 600, openingPrice: 701, closingPice: 803 },
+      { date: '09-20', heightPrice: 1000, lowPrice: 600, openingPrice: 807, closingPice: 909 },
+    ]
+  }
+  renderKLineChart(dataSource, configProps, init)
 }
 
 /**
  * 绘制k线图
- * @param {array} data 数据源
+ * @param {array} dataSource 数据源
  * @param {object} config k线图配置项
  */
 function renderKLineChart (
-  data = [],
+  dataSource = {},
   {
     // y轴分段数量
     yAxisSplitNumber = 4,
@@ -84,18 +84,15 @@ function renderKLineChart (
     canDrag = false,
     // 是否可缩放
     canScroll = false,
-    // 最多展示多少条数据
-    maxShow = 20,
-    // 最少展示多少条数据
-    minShow = 10,
+    // 一页展示多少条数据
+    pageSize = 10,
+    // 最多一页展示多少条数据
+    maxShowSize = 20,
   },
   init = false
 ) {
-  console.log('开始绘制k线图:', data);
-  //
-  let cloneData = [...data]
-  let cloneLeftData = [...leftData]
-  let cloneRightData = [...rightData]
+  console.log('开始绘制k线图:', dataSource);
+  let { leftData: cloneLeftData, data: cloneData, rightData: cloneRightData } = dataSource
 
   // 已知条件
   // 容器宽度
@@ -524,7 +521,7 @@ function renderKLineChart (
 
       // 绘制x轴tip文字
       // 获取x轴元素在x轴上的下标
-      const xTipIndex = Math.round((offsetX - yAxisPointX) / xAxisWidth * xAxisItemLength / (data.length / cloneData.length))
+      const xTipIndex = Math.round((offsetX - yAxisPointX) / xAxisWidth * xAxisItemLength / (pageSize / cloneData.length))
       renderText(ctxTip, offsetX, yAxisOriginPointY + xyAxisTipBoxHeight / 2, cloneData.map((x) => x.date)[xTipIndex] || '', 'center', '#fff')
 
       // 设置提示框元素的样式和内容
@@ -593,7 +590,7 @@ function renderKLineChart (
       const { offsetX, offsetY } = e
 
       return  offsetX > yAxisPointX &&
-              offsetX < width - padding.right - xAxisWidth / xAxisItemLength * (data.length / cloneData.length) &&
+              offsetX < width - padding.right - xAxisWidth / xAxisItemLength * (pageSize / cloneData.length) &&
               offsetY > padding.top &&
               offsetY < yAxisOriginPointY
     }
@@ -651,12 +648,22 @@ function renderKLineChart (
             // 如果左侧数据全部显示完成，则不绘制
             if (cloneLeftData.length === 0) return
 
+            // 请求数据：如果左侧数据小于最小展示条数，请求接口数据
+            if (cloneLeftData.length < pageSize) {
+              console.log('请求左侧数据，并赋值给cloneLeftData');
+            }
+
             cloneData.unshift(cloneLeftData.pop())
             cloneRightData.unshift(cloneData.pop())
           } else {
             // 往左拖动
             dragDirection = 'left'
             if (cloneRightData.length === 0) return
+
+            // 请求数据：如果左侧数据小于最小展示条数，请求接口数据
+            if (cloneRightData.length < pageSize) {
+              console.log('请求右侧数据，并赋值给cloneRightData');
+            }
 
             cloneData.push(cloneRightData.shift())
             cloneLeftData.push(cloneData.shift())
@@ -670,7 +677,7 @@ function renderKLineChart (
         ctx.clearRect(0, 0, width, height)
 
         // 拿新数据重新绘制
-        renderKLineChart(cloneData, config)
+        renderKLineChart({leftData: cloneLeftData, data: cloneData, rightData: cloneRightData}, config)
       }
 
       lastPosition = offsetX
@@ -701,7 +708,7 @@ function renderKLineChart (
       if (deltaY > 0) {
         console.log('向下');
         // 最小展示条数
-        if (cloneData.length <= minShow) return
+        if (cloneData.length <= pageSize) return
 
         // 处理数据
         cloneLeftData.push(cloneData.shift())
@@ -710,13 +717,18 @@ function renderKLineChart (
       if (deltaY < 0) {
         console.log('向上')
         // 最多展示条数
-        if (cloneData.length >= maxShow) return
+        if (cloneData.length >= maxShowSize) {
+          console.log('请求数据: 达到最多展示数据数量，请求左右两侧数据，并赋值');
+          // cloneLeftData = requestResult
+          // cloneRightData = requestResult
+          return
+        }
 
         cloneData = [cloneLeftData.pop(), ...cloneData, cloneRightData.shift()]
       }
 
       ctx.clearRect(0, 0, width, height)
-      renderKLineChart(cloneData, config)
+      renderKLineChart({leftData: cloneLeftData, data: cloneData, rightData: cloneRightData}, config)
     }, false)
   }
 }
