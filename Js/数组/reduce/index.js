@@ -2,6 +2,8 @@
 // 对数组中的每一个元素执行提供的函数（升序执行），将其结果汇总为单个返回值
 // 回调函数：callback(accumulator, curValue, curIndex, array)
 // initialValue: 初始值
+// 如果提供initialValue，accumulator为initialValue，curValue为每数组的item
+// 如果没提供initialValue，accumulator为arr[0]，curValue为arr[1]
 
 let result = undefined;
 const initialValue = 100;

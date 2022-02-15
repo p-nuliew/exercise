@@ -1,4 +1,4 @@
-// Array.from 将类数组或可迭代对象转成数组，返回新数组
+// Array.from 将类数组(Set)或可迭代对象转成数组，返回新数组
 // Array.from(arrayLike, mapFn, thisArg);
 
 // arrayLike 类数组对象或可迭代对象

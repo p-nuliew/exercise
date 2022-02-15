@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    class Parent {
+      static myMethod(msg) {
+        console.log('static', msg);
+      }
+
+      myMethod(msg) {
+        console.log('instance', msg);
+      }
+    }
+
+    class Child extends Parent {
+      static myMethod(msg) {
+        super.myMethod(msg);
+      }
+
+      myMethod(msg) {
+        super.myMethod(msg);
+      }
+    }
+
+    // super在静态方法中，指向父类
+    Child.myMethod(1); // static 1
+
+    // super在普通方法中，指向父类的原型
+    var child = new Child();
+    child.myMethod(2); // instance 2
+  </script>
+</body>
+</html>

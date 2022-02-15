@@ -1,3 +1,6 @@
+// 循环的理解：是一种方法，可以重复做某些事
+// 迭代：表示一个约定，想Array、Map 都称之为可迭代对象
+
 // label语句: label的值可以是任何的非保留字的js标识符，statement是语句（块）
 // 语法 label: statement
 

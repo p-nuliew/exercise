@@ -185,22 +185,41 @@
 // 只要p1、p2、p3之中有一个实例率先改变状态，p的状态就跟着改变，那个率先改变的Promise实例的返回值，就传递给P的回调函数
 
 // 如果 5 秒之内请求无法返回结果，变量p的状态就会变为rejected，从而触发catch方法指定的回调函数
-const p = Promise.race([
+Promise.race([
   new Promise((resolve, reject) => {
     // 模拟请求，10秒后返回数据
     setTimeout(resolve, 10000, "my name is a");
   }),
   new Promise(function (resolve, reject) {
     // 处理请求超时
-    setTimeout(() => reject(new Error("request timeout")), 5000);
+    setTimeout(reject, 5000, new Error('超时了'));
   }),
 ])
-  .then((res) => {
-    console.log(res);
-  })
-  .catch((err) => {
-    alert(err);
-  });
+.then((res) => {
+  console.log(res);
+})
+.catch((err) => {
+  console.log('err: ', err);
+  alert(err);
+});
+
+
+
+  // Promise.race([
+  //   new Promise((resolve) => {
+  //     // 请求数据
+  //     setTimeout(resolve, 3*1000, '成功数据')
+  //   }),
+  //   new Promise((resolve, reject) => {
+  //     setTimeout(reject, 2*1000, '接口超时，请稍后再试')
+  //   })
+  // ]).then(res => {
+  //   console.log('success');
+  // }).catch(err => {
+  //   console.log('接口超时:', err);
+  // })
+
+
 
 // p
 // .then(res => console.log(res))
@@ -265,3 +284,46 @@ function logInOrder(urls) {
 }
 
 logInOrder([1, 3, 2]);
+
+
+// 模拟异步
+const delay = (data) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(data)
+      console.log('data: ', data);
+    }, Math.random() * 1000)
+  })
+}
+
+
+// 手写Promise.all
+Promise._all = (array) => {
+  return new Promise((resolve, reject) => {
+    let count = 0;
+    const result = []
+    for (let i = 0, len = array.length; i < len; i++) {
+      array[i].then((data) => {
+        result[i] = data
+        count++
+        // 因为array[i]的执行是异步的，所以这种判断是错误的
+        // 如果i===2的promise先执行完毕,result[2]导致result.length === 3
+        // if (result.length === array.length) {
+        //   resolve(result)
+        // }
+        if (count === array.length) {
+          resolve(result)
+        }
+      }, reject)
+    }
+  })
+}
+
+// const p1 = delay(1)
+// const p2 = delay(2)
+// const p3 = delay(3)
+Promise._all([delay(2), delay(1), delay(3)]).then(res => {
+  console.log('res: ', res);
+}, (err) => {
+  console.log('err: ', err);
+})

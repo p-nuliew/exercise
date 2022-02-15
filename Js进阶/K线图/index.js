@@ -318,7 +318,7 @@ function renderKLineChart (
       let prevNode = {}
       let nextNode = {}
 
-      // 边界处理：在首尾加入虚拟点，不全第一个元素没有前控制点，末尾元素没有后控制点的情况
+      // 边界处理：在首尾加入虚拟点，补全第一个元素没有前控制点，末尾元素没有后控制点的情况
       if (i === 0) {
         prevNode = { heightPrice: tranPriceToOrdinate(1000), lowPrice: tranPriceToOrdinate(600), openingPrice: tranPriceToOrdinate(780), closingPice: tranPriceToOrdinate(899) }
         nextNode = dataYAxisPoint[i + 1]
