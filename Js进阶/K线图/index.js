@@ -591,6 +591,13 @@ function renderKLineChart (
         div.setAttribute('draggable', 'true')
 
         kWrapNode.appendChild(div)
+
+        // 处理“没有拖动时，单击拖拽元素后提示画布没有隐藏，表现为卡顿'的情况
+        // 解决：mouseup 时，隐蔽自己，否则拖拽元素在最上层，提示画布将被遮挡无法显示
+        // 因为拖拽元素在最上层，所以 mouseup 事件要绑定在拖拽元素上，绑在 tipCanvas 上无效
+        div.addEventListener('mouseup', function(e) {
+          div.style.display = 'none'
+        })
       }
     }, false)
 
