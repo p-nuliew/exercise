@@ -1,6 +1,6 @@
 // javascript
 const canvas = document.getElementById('canvas');
-canvas.style.background = '#fff'
+canvas.style.background = '#100C2A'
 
 if (canvas.getContext) {
   ctx = canvas.getContext('2d');
@@ -94,16 +94,30 @@ function renderKLineChart (
   console.log('开始绘制k线图:', dataSource);
   let { leftData: cloneLeftData, data: cloneData, rightData: cloneRightData } = dataSource
 
+  // const COLOR = {
+  //   RED: '#EB5454',
+  //   GREEN: '#46B262',
+  //   LINE: '#E3E3E3',
+  //   WHITE: '#FFF',
+  //   BLACK: '#000',
+  // }
+  // const TEXT_COLOR = {
+  //   PRIMARY: '#333',
+  //   SECOND: '#999',
+  // }
+
   const COLOR = {
+    PRIMARY: '#4180E0',
     RED: '#EB5454',
     GREEN: '#46B262',
-    LINE: '#F5F5F5',
+    LINE: '#FFF',
+    TIP_LINE: '#727183',
     WHITE: '#FFF',
     BLACK: '#000',
   }
   const TEXT_COLOR = {
-    PRIMARY: '#333',
-    SECOND: '#999',
+    PRIMARY: '#FDFDFD',
+    SECOND: '#666',
   }
 
   // 已知条件
@@ -159,8 +173,7 @@ function renderKLineChart (
   // ctx.closePath();
   // ctx.stroke()
 
-  // 绘制x轴
-  renderLine(yAxisPointX, yAxisOriginPointY, xAxisVertexX, yAxisOriginPointY, COLOR.BLACK)
+
 
   // 绘制y轴三角形
   // ctx.beginPath()
@@ -184,7 +197,13 @@ function renderKLineChart (
 
     renderText(ctx, sx - candleW / 2 - 1, y, yAxisTickText(i), 'right', TEXT_COLOR.PRIMARY)
     // renderLine(sx, y, ex, y, TEXT_COLOR.PRIMARY)
+
+    // 内容区域辅助线
+    // renderLine(sx, y, xAxisVertexX, y, COLOR.LINE)
   }
+
+  // 绘制x轴
+  renderLine(yAxisPointX, yAxisOriginPointY, xAxisVertexX, yAxisOriginPointY, COLOR.LINE)
 
   // 绘制x轴刻度与文字
   for (let i = 0; i < xAxisItemLength; i++) {
@@ -193,7 +212,7 @@ function renderKLineChart (
     // 隔点展示
     if (i % remainder === 0 || i === xAxisItemLength - 1) {
       renderText(ctx, xAxisTickX, yAxisOriginPointY + tickWidth + 10, cloneData.map((x) => x.date)[i], 'center', TEXT_COLOR.PRIMARY)
-      renderLine(xAxisTickX, yAxisOriginPointY, xAxisTickX, yAxisOriginPointY + tickWidth, COLOR.BLACK)
+      renderLine(xAxisTickX, yAxisOriginPointY, xAxisTickX, yAxisOriginPointY + tickWidth, COLOR.LINE)
     }
   }
 
@@ -494,6 +513,7 @@ function renderKLineChart (
       ctxTip.setLineDash([4, 4]);
       ctxTip.moveTo(yAxisPointX, offsetY);
       ctxTip.lineTo(canvasWidth - padding.right - xAxisWidth / xAxisItemLength, offsetY);
+      ctxTip.strokeStyle = COLOR.LINE
       ctxTip.stroke();
 
       // 绘制垂直辅助线
@@ -506,7 +526,7 @@ function renderKLineChart (
       // 绘制y轴tip文字背景框
       ctxTip.beginPath();
       ctxTip.rect(0, offsetY - xyAxisTipBoxHeight / 2, xyAxisTipBoxWidth, xyAxisTipBoxHeight);
-      ctxTip.fillStyle = '#999'
+      ctxTip.fillStyle = '#B9B8CE'
       ctxTip.fill();
 
       const yAxisLengthTranToPrice = len => {
@@ -515,13 +535,13 @@ function renderKLineChart (
         return (minPrice + len * x).toFixed(2)
       }
       // 绘制y轴tip文字
-      renderText(ctxTip, yAxisPointX - 30, offsetY, yAxisLengthTranToPrice(yAxisOriginPointY - offsetY), 'left', COLOR.WHITE)
+      renderText(ctxTip, yAxisPointX - 30, offsetY, yAxisLengthTranToPrice(yAxisOriginPointY - offsetY), 'center', COLOR.WHITE)
 
 
       // 绘制x轴tip文字背景框
       ctxTip.beginPath();
       ctxTip.rect(offsetX - xyAxisTipBoxWidth / 2, yAxisOriginPointY, xyAxisTipBoxWidth, xyAxisTipBoxHeight);
-      ctxTip.fillStyle = '#999'
+      ctxTip.fillStyle = '#B9B8CE'
       ctxTip.fill();
 
       // 绘制x轴tip文字
@@ -530,18 +550,23 @@ function renderKLineChart (
       renderText(ctxTip, offsetX, yAxisOriginPointY + xyAxisTipBoxHeight / 2, cloneData.map((x) => x.date)[xTipIndex] || '', 'center', COLOR.WHITE)
 
       // 设置提示框元素的样式和内容
-      const { date, heightPrice, lowPrice } = cloneData[xTipIndex]
+      const { date, heightPrice, lowPrice, openingPrice, closingPice } = cloneData[xTipIndex]
       tipInfoEl.style.display = 'block'
       // 如果有子元素，说明已经插入，避免重复获取元素
       if (tipDateEl) {
         tipDateEl.innerText = date
-        heightPriceEl.innerText = `最高价：${heightPrice}`
-        lowPriceEl.innerText = `最低价：${lowPrice}`
-        // 如果光标在x轴后半部分，提示框定位到左侧，反之亦然
+        lowPriceEl.innerText = `lowest：${lowPrice}`
+        heightPriceEl.innerText = `highest：${heightPrice}`
+
+        // 设置样式
+        tipInfoEl.style.width = tipInfoElWidth + 'px'
+        tipInfoEl.style.borderRadius = '4px'
+        tipInfoEl.style.color = TEXT_COLOR.SECOND
+
+        // 设置提示框位置。如果光标在x轴后半部分，提示框定位到左侧，反之亦然
         if (xTipIndex > xAxisItemLength / 2) {
           tipInfoEl.style.left = padding.left + 'px'
         } else {
-          tipInfoEl.style.width = tipInfoElWidth + 'px'
           tipInfoEl.style.left = padding.left + xAxisWidth - tipInfoElWidth + 'px'
         }
       } else {
