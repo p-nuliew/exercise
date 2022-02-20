@@ -1,6 +1,6 @@
 // javascript
 const canvas = document.getElementById('canvas');
-canvas.style.background = '#e8e8e8'
+canvas.style.background = '#fff'
 
 if (canvas.getContext) {
   ctx = canvas.getContext('2d');
@@ -96,9 +96,9 @@ function renderKLineChart (
 
   // 已知条件
   // 容器宽度
-  const width = ctx.canvas.width
+  const canvasWidth = ctx.canvas.width
   // 容器高度
-  const height = ctx.canvas.height
+  const canvasHeight = ctx.canvas.height
   // x轴元素数量
   const xAxisItemLength = cloneData.length
   const config = arguments[1]
@@ -107,17 +107,17 @@ function renderKLineChart (
   // y轴横坐标
   const yAxisPointX = padding.left
   // y轴原点纵坐标
-  const yAxisOriginPointY = height - padding.bottom
+  const yAxisOriginPointY = canvasHeight - padding.bottom
   // y轴顶点纵坐标
   const yAxisVertexY = padding.top
   // y轴高度
-  const yAxisHeight = height - (padding.top + padding.bottom)
+  const yAxisHeight = canvasHeight - (padding.top + padding.bottom)
   // y轴刻度间距
   const yAxisTickSpace = yAxisHeight / (yAxisSplitNumber - 1)
   // x轴顶点横坐标
-  const xAxisVertexX = width - yAxisPointX
+  const xAxisVertexX = canvasWidth - yAxisPointX
   // x轴宽度
-  const xAxisWidth = width - yAxisPointX - padding.right
+  const xAxisWidth = canvasWidth - yAxisPointX - padding.right
   // x轴元素间距
   const xAxisItemSpace = xAxisWidth / xAxisItemLength
   // x轴展示间隔数（不包括最后一个元素）
@@ -443,10 +443,6 @@ function renderKLineChart (
     if (!tipCanvas.getContext) return
     const ctxTip = tipCanvas.getContext('2d');
 
-    // 容器宽度
-    const width = ctxTip.canvas.width
-    // 容器高度
-    const height = ctxTip.canvas.height
     // 提示框元素
     let tipInfoEl = null
     // 提示框元素宽度
@@ -473,7 +469,7 @@ function renderKLineChart (
       // 鼠标距目标节点左上角的X坐标、Y坐标
       const { offsetX, offsetY } = e
       // 清除画布
-      ctxTip.clearRect(0, 0, width, height)
+      ctxTip.clearRect(0, 0, canvasWidth, canvasHeight)
 
       // 不在内容区域则隐藏提示详情框并释放dom元素的绑定
       if (!isContentArea(e)) {
@@ -488,7 +484,7 @@ function renderKLineChart (
       ctxTip.beginPath();
       ctxTip.setLineDash([4, 4]);
       ctxTip.moveTo(yAxisPointX, offsetY);
-      ctxTip.lineTo(width - padding.right - xAxisWidth / xAxisItemLength, offsetY);
+      ctxTip.lineTo(canvasWidth - padding.right - xAxisWidth / xAxisItemLength, offsetY);
       ctxTip.stroke();
 
       // 绘制垂直辅助线
@@ -568,8 +564,8 @@ function renderKLineChart (
         div.style.zIndex = '10'
         div.style.left = `${padding.left}px`
         div.style.top = `${padding.top}px`
-        div.style.width = `${width - padding.left - padding.right}px`
-        div.style.height = `${height - padding.top - padding.bottom}px`
+        div.style.width = `${canvasWidth - padding.left - padding.right}px`
+        div.style.height = `${canvasHeight - padding.top - padding.bottom}px`
         div.style.cursor = 'grab'
         div.setAttribute('id', 'draggable')
         div.setAttribute('draggable', 'true')
@@ -590,7 +586,7 @@ function renderKLineChart (
       const { offsetX, offsetY } = e
 
       return  offsetX > yAxisPointX &&
-              offsetX < width - padding.right - xAxisWidth / xAxisItemLength * (pageSize / cloneData.length) &&
+              offsetX < canvasWidth - padding.right - xAxisWidth / xAxisItemLength * (pageSize / cloneData.length) &&
               offsetY > padding.top &&
               offsetY < yAxisOriginPointY
     }
@@ -611,12 +607,9 @@ function renderKLineChart (
       // 清除提示画布并隐藏提示详情框
       const tipCanvas = document.getElementById('tipCanvas');
       const ctxTip = tipCanvas.getContext('2d');
-      // 容器宽度
-      const width = ctxTip.canvas.width
-      // 容器高度
-      const height = ctxTip.canvas.height
+
       // 清除提示画布
-      ctxTip.clearRect(0, 0, width, height)
+      ctxTip.clearRect(0, 0, canvasWidth, canvasHeight)
 
       insertPosition = event.offsetX
       lastPosition = event.offsetX
@@ -674,7 +667,7 @@ function renderKLineChart (
         insertPosition = offsetX
 
         // 清除画布并输入新数据重新绘制
-        ctx.clearRect(0, 0, width, height)
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight)
 
         // 拿新数据重新绘制
         renderKLineChart({leftData: cloneLeftData, data: cloneData, rightData: cloneRightData}, config)
@@ -727,7 +720,7 @@ function renderKLineChart (
         cloneData = [cloneLeftData.pop(), ...cloneData, cloneRightData.shift()]
       }
 
-      ctx.clearRect(0, 0, width, height)
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight)
       renderKLineChart({leftData: cloneLeftData, data: cloneData, rightData: cloneRightData}, config)
     }, false)
   }

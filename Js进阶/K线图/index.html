@@ -6,15 +6,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>K线图</title>
   <style>
+    body{
+      background-color: pink;
+    }
     *{
       margin: 0;
       padding: 0;
     }
+    #kWrap{
+      position: relative;
+      left: 150px;
+      width: 600px;
+      height: 300px;
+    }
+    #tipCanvas{
+      position: absolute;
+      left: 0;
+      top: 0;
+      /* width: 100% */
+    }
     #tipInfo {
       position: absolute;
       z-index: 5;
-      padding: 2px;
-      width: 100px;
+      padding: 5px;
+      /* width: 100px; */
       line-height: 16px;
       font-size: 12px;
       left: 50px;
@@ -28,15 +43,14 @@
   </style>
 </head>
 <body>
-  <div id="kWrap" style="position: relative; left: 150px;width: 600px; height: 300px;">
+  <div id="kWrap">
     <canvas id="canvas" width="600" height="300"></canvas>
-    <canvas id="tipCanvas" width="600" height="300" style="position: absolute; left: 0; top: 0;width: 100%"></canvas>
+    <canvas id="tipCanvas" width="600" height="300"></canvas>
     <div id="tipInfo">
       <div id="tipDate">09-09</div>
       <div id="heightPrice"></div>
       <div id="lowPrice"></div>
     </div>
-    <!-- <div id="draggable" draggable="true"></div> -->
   </div>
 
   <script src="./index.js"></script>
