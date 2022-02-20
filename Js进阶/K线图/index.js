@@ -95,8 +95,8 @@ function renderKLineChart (
   let { leftData: cloneLeftData, data: cloneData, rightData: cloneRightData } = dataSource
 
   const COLOR = {
-    RED: 'red',
-    GREEN: 'green',
+    RED: '#EB5454',
+    GREEN: '#46B262',
   }
   const TEXT_COLOR = {
     PRIMARY: '#333',
