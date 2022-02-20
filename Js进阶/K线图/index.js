@@ -75,7 +75,7 @@ function renderKLineChart (
     // 刻度线宽度
     tickWidth = 5,
     // 蜡烛宽度
-    candleW = 10,
+    candleW = 20,
     // 曲线类型
     curveType = 'lowPrice',
     // 是否绘制辅助线
@@ -181,7 +181,7 @@ function renderKLineChart (
         ex = yAxisPointX + tickWidth
         y = yAxisOriginPointY - yAxisTickSpace * i * contentHeightRate
 
-    renderText(ctx, sx - 10, y, yAxisTickText(i), 'right', TEXT_COLOR.PRIMARY)
+    renderText(ctx, sx - candleW / 2 - 1, y, yAxisTickText(i), 'right', TEXT_COLOR.PRIMARY)
     // renderLine(sx, y, ex, y, TEXT_COLOR.PRIMARY)
   }
 
