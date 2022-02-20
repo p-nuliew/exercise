@@ -141,11 +141,11 @@ function renderKLineChart (
   })
 
   // 绘制Y轴
-  ctx.beginPath()
-  ctx.moveTo(yAxisPointX, yAxisOriginPointY)
-  ctx.lineTo(yAxisPointX, yAxisVertexY)
-  ctx.closePath();
-  ctx.stroke()
+  // ctx.beginPath()
+  // ctx.moveTo(yAxisPointX, yAxisOriginPointY)
+  // ctx.lineTo(yAxisPointX, yAxisVertexY)
+  // ctx.closePath();
+  // ctx.stroke()
 
   // 绘制x轴
   ctx.beginPath()
@@ -155,18 +155,18 @@ function renderKLineChart (
   ctx.stroke()
 
   // 绘制y轴三角形
-  ctx.beginPath()
-  ctx.moveTo(yAxisPointX, yAxisVertexY)
-  ctx.lineTo(yAxisPointX - triangleH/2, yAxisVertexY + triangleH)
-  ctx.lineTo(yAxisPointX + triangleH/2, yAxisVertexY + triangleH)
-  ctx.fill()
+  // ctx.beginPath()
+  // ctx.moveTo(yAxisPointX, yAxisVertexY)
+  // ctx.lineTo(yAxisPointX - triangleH/2, yAxisVertexY + triangleH)
+  // ctx.lineTo(yAxisPointX + triangleH/2, yAxisVertexY + triangleH)
+  // ctx.fill()
 
   // 绘制x轴三角形
-  ctx.beginPath()
-  ctx.moveTo(xAxisVertexX, yAxisOriginPointY)
-  ctx.lineTo(xAxisVertexX - triangleH, yAxisOriginPointY - triangleH/2)
-  ctx.lineTo(xAxisVertexX - triangleH, yAxisOriginPointY + triangleH/2)
-  ctx.fill()
+  // ctx.beginPath()
+  // ctx.moveTo(xAxisVertexX, yAxisOriginPointY)
+  // ctx.lineTo(xAxisVertexX - triangleH, yAxisOriginPointY - triangleH/2)
+  // ctx.lineTo(xAxisVertexX - triangleH, yAxisOriginPointY + triangleH/2)
+  // ctx.fill()
 
   // 绘制y轴文字与刻度
   for (let i = 0; i < yAxisSplitNumber; i++) {
