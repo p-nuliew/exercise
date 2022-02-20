@@ -97,12 +97,13 @@ function renderKLineChart (
   const COLOR = {
     RED: '#EB5454',
     GREEN: '#46B262',
+    LINE: '#F5F5F5',
+    WHITE: '#FFF',
+    BLACK: '#000',
   }
   const TEXT_COLOR = {
     PRIMARY: '#333',
     SECOND: '#999',
-    WHITE: '#FFF',
-    BLACK: '#000',
   }
 
   // 已知条件
@@ -159,7 +160,7 @@ function renderKLineChart (
   // ctx.stroke()
 
   // 绘制x轴
-  renderLine(yAxisPointX, yAxisOriginPointY, xAxisVertexX, yAxisOriginPointY, TEXT_COLOR.BLACK)
+  renderLine(yAxisPointX, yAxisOriginPointY, xAxisVertexX, yAxisOriginPointY, COLOR.BLACK)
 
   // 绘制y轴三角形
   // ctx.beginPath()
@@ -192,7 +193,7 @@ function renderKLineChart (
     // 隔点展示
     if (i % remainder === 0 || i === xAxisItemLength - 1) {
       renderText(ctx, xAxisTickX, yAxisOriginPointY + tickWidth + 10, cloneData.map((x) => x.date)[i], 'center', TEXT_COLOR.PRIMARY)
-      renderLine(xAxisTickX, yAxisOriginPointY, xAxisTickX, yAxisOriginPointY + tickWidth, TEXT_COLOR.BLACK)
+      renderLine(xAxisTickX, yAxisOriginPointY, xAxisTickX, yAxisOriginPointY + tickWidth, COLOR.BLACK)
     }
   }
 
@@ -406,18 +407,19 @@ function renderKLineChart (
    * @param {string} lineColor 线条颜色
    * @param {number} lineWidth 线条宽度
    */
-  function renderLine (sx, sy, ex, ey, lineColor = TEXT_COLOR.BLACK, lineWidth = 1) {
+  function renderLine (sx, sy, ex, ey, lineColor = COLOR.BLACK, lineWidth = 1) {
     ctx.beginPath()
     //lineWidth = 1px时线条模糊的问题
     // 原理是canvas的路径中间有一条无限细的中心线，lineWidth 1px表示在中心线路径两边各绘制线宽的一半，也就是0.5，又因为浏览器的最小像素是1px，无法绘制0.5的像素，所以只好再往两边各扩展0.5px，所以导致看起来为2px
     // 参考https://www.cnblogs.com/star91/p/Canvas-zhong-ru-he-hua-yi-tiao-qing-xi-de-xian-kua.html
     ctx.moveTo(sx+0.5, sy+0.5)
     ctx.lineTo(ex+0.5, ey+0.5)
-    ctx.fillStyle = lineColor
-    // ctx.strokeStyle = lineColor
+    // ctx.fillStyle = lineColor
+    ctx.strokeStyle = lineColor
     ctx.lineWidth = lineWidth
-    ctx.closePath();
     ctx.stroke()
+    ctx.closePath();
+
   }
 
   /**
@@ -513,7 +515,7 @@ function renderKLineChart (
         return (minPrice + len * x).toFixed(2)
       }
       // 绘制y轴tip文字
-      renderText(ctxTip, yAxisPointX - 30, offsetY, yAxisLengthTranToPrice(yAxisOriginPointY - offsetY), 'left', TEXT_COLOR.WHITE)
+      renderText(ctxTip, yAxisPointX - 30, offsetY, yAxisLengthTranToPrice(yAxisOriginPointY - offsetY), 'left', COLOR.WHITE)
 
 
       // 绘制x轴tip文字背景框
@@ -525,7 +527,7 @@ function renderKLineChart (
       // 绘制x轴tip文字
       // 获取x轴元素在x轴上的下标
       const xTipIndex = Math.round((offsetX - yAxisPointX) / xAxisWidth * xAxisItemLength / (pageSize / cloneData.length))
-      renderText(ctxTip, offsetX, yAxisOriginPointY + xyAxisTipBoxHeight / 2, cloneData.map((x) => x.date)[xTipIndex] || '', 'center', TEXT_COLOR.WHITE)
+      renderText(ctxTip, offsetX, yAxisOriginPointY + xyAxisTipBoxHeight / 2, cloneData.map((x) => x.date)[xTipIndex] || '', 'center', COLOR.WHITE)
 
       // 设置提示框元素的样式和内容
       const { date, heightPrice, lowPrice } = cloneData[xTipIndex]
