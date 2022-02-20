@@ -471,26 +471,13 @@ function renderKLineChart (
     if (!tipCanvas.getContext) return
     const ctxTip = tipCanvas.getContext('2d');
 
-    // 提示框元素
-    let tipInfoEl = null
     // 提示框元素宽度
     let tipInfoElWidth = 100
     // 提示框内的日期元素
-    let tipDateEl = null
-    // 提示框内的最高价元素
-    let heightPriceEl = null
-    // 提示框内的最低价元素
-    let lowPriceEl = null
-    // x轴y轴上的提示框宽、高
+    let tipInfoElHeight = 80
+    // x轴y轴上的提示背景框的宽、高
     const xyAxisTipBoxWidth = padding.left
     const xyAxisTipBoxHeight = 20
-
-    // 处理辅助线
-    // 监听鼠标进入事件
-    tipCanvas.addEventListener('mouseenter', function (e) {
-      // 保存提示详情框的引用
-      tipInfoEl = document.getElementById('tipInfo')
-    }, false)
 
     // 监听鼠标移动事件并绘制辅助线
     tipCanvas.addEventListener('mousemove', function (e) {
@@ -499,18 +486,12 @@ function renderKLineChart (
       // 清除画布
       ctxTip.clearRect(0, 0, canvasWidth, canvasHeight)
 
-      // 不在内容区域则隐藏提示详情框并释放dom元素的绑定
-      if (!isContentArea(e)) {
-        tipInfoEl.style.display = 'none'
-        tipDateEl = null
-        heightPriceEl = null
-        lowPriceEl = null
-        return
-      }
+      // 不在内容区域则不进行绘制
+      if (!isContentArea(e)) return
 
       // 绘制水平辅助线
       ctxTip.beginPath();
-      ctxTip.setLineDash([4, 4]);
+      ctxTip.setLineDash([4, 4]); // 设置虚线样式
       ctxTip.moveTo(yAxisPointX, offsetY);
       ctxTip.lineTo(canvasWidth - padding.right - xAxisWidth / xAxisItemLength, offsetY);
       ctxTip.strokeStyle = COLOR.LINE
@@ -537,7 +518,6 @@ function renderKLineChart (
       // 绘制y轴tip文字
       renderText(ctxTip, yAxisPointX - 30, offsetY, yAxisLengthTranToPrice(yAxisOriginPointY - offsetY), 'center', COLOR.WHITE)
 
-
       // 绘制x轴tip文字背景框
       ctxTip.beginPath();
       ctxTip.rect(offsetX - xyAxisTipBoxWidth / 2, yAxisOriginPointY, xyAxisTipBoxWidth, xyAxisTipBoxHeight);
@@ -549,31 +529,37 @@ function renderKLineChart (
       const xTipIndex = Math.round((offsetX - yAxisPointX) / xAxisWidth * xAxisItemLength / (pageSize / cloneData.length))
       renderText(ctxTip, offsetX, yAxisOriginPointY + xyAxisTipBoxHeight / 2, cloneData.map((x) => x.date)[xTipIndex] || '', 'center', COLOR.WHITE)
 
-      // 设置提示框元素的样式和内容
-      const { date, heightPrice, lowPrice, openingPrice, closingPice } = cloneData[xTipIndex]
-      tipInfoEl.style.display = 'block'
-      // 如果有子元素，说明已经插入，避免重复获取元素
-      if (tipDateEl) {
-        tipDateEl.innerText = date
-        lowPriceEl.innerText = `lowest：${lowPrice}`
-        heightPriceEl.innerText = `highest：${heightPrice}`
-
-        // 设置样式
-        tipInfoEl.style.width = tipInfoElWidth + 'px'
-        tipInfoEl.style.borderRadius = '4px'
-        tipInfoEl.style.color = TEXT_COLOR.SECOND
-
-        // 设置提示框位置。如果光标在x轴后半部分，提示框定位到左侧，反之亦然
-        if (xTipIndex > xAxisItemLength / 2) {
-          tipInfoEl.style.left = padding.left + 'px'
-        } else {
-          tipInfoEl.style.left = padding.left + xAxisWidth - tipInfoElWidth + 'px'
-        }
-      } else {
-        tipDateEl = document.getElementById('tipDate')
-        heightPriceEl = document.getElementById('heightPrice')
-        lowPriceEl = document.getElementById('lowPrice')
+      // 绘制提示框
+      let tipInfoPointX = padding.left + xAxisWidth - tipInfoElWidth  //  提示框的开始横坐标
+      if (xTipIndex > xAxisItemLength / 2) {
+        tipInfoPointX = padding.left
       }
+      ctxTip.beginPath()
+      ctxTip.rect(tipInfoPointX, yAxisVertexY, tipInfoElWidth, tipInfoElHeight)
+      ctxTip.fillStyle = COLOR.WHITE
+      ctxTip.fill();
+
+      const { date, heightPrice, lowPrice, openingPrice, closingPice } = cloneData[xTipIndex]
+      const dataArr = [
+        { label: 'open', value: openingPrice },
+        { label: 'close', value: closingPice },
+        { label: 'lowest', value: lowPrice },
+        { label: 'highest', value: heightPrice },
+      ]
+
+      // 日期
+      renderText(ctxTip, tipInfoPointX + 11, yAxisVertexY + 10, date, 'left', TEXT_COLOR.SECOND)
+      // 当前数据
+      dataArr.forEach(({ label, value }, i) => {
+        // 设置提示框元素的样式和内容
+        renderText(ctxTip, tipInfoPointX + 15, yAxisVertexY + 25 + i * 15, `${label}: ${value}`, 'left', TEXT_COLOR.SECOND)
+
+        // 绘制小圆点
+        ctxTip.beginPath();
+        ctxTip.arc(tipInfoPointX + 10, yAxisVertexY + 25 + i * 15, 1, 0, 2 * Math.PI);
+        ctxTip.fillStyle = COLOR.PRIMARY;
+        ctxTip.fill()
+      })
     }, false)
 
 
@@ -581,7 +567,7 @@ function renderKLineChart (
     // 鼠标按下时，显示拖拽元素在最上层
     tipCanvas.addEventListener('mousedown', function (e) {
       if (canDrag) {
-        //创建拖拽元素
+
         const kWrapNode = document.getElementById('kWrap')
         const draggableNode = document.getElementById('draggable')
 
@@ -592,8 +578,8 @@ function renderKLineChart (
           return
         }
 
+        //创建拖拽元素
         const div = document.createElement('div')
-
         div.style.position = 'absolute'
         div.style.zIndex = '10'
         div.style.left = `${padding.left}px`
@@ -605,13 +591,6 @@ function renderKLineChart (
         div.setAttribute('draggable', 'true')
 
         kWrapNode.appendChild(div)
-
-        // 因为拖拽元素在最上层，所以 mouseup 事件要绑定在拖拽元素上，绑在 tipCanvas 上无效
-        // mouseup 时，隐蔽自己，否则提示画布出不来
-        div.addEventListener('mouseup', function(e) {
-          div.style.display = 'none'
-        })
-
       }
     }, false)
 
@@ -638,8 +617,9 @@ function renderKLineChart (
 
     /* 拖动目标元素时触发drag事件 */
     document.addEventListener("dragstart", function( event ) {
-      // 清除提示画布并隐藏提示详情框
+      // 清除提示画布
       const tipCanvas = document.getElementById('tipCanvas');
+      if (!tipCanvas.getContext) return
       const ctxTip = tipCanvas.getContext('2d');
 
       // 清除提示画布
@@ -647,9 +627,6 @@ function renderKLineChart (
 
       insertPosition = event.offsetX
       lastPosition = event.offsetX
-
-      tipInfoEl = document.getElementById('tipInfo')
-      tipInfoEl.style.display = 'none'
     }, false);
 
     /* 拖动目标元素时触发drag事件 */
@@ -712,6 +689,7 @@ function renderKLineChart (
 
     // 拖动结束时，隐藏draggable，否则辅助线出不来
     document.addEventListener("dragend", function( event ) {
+      console.log('dragend: ');
       const draggableNode = document.getElementById('draggable')
       draggableNode.style.display = 'none'
       draggableNode.style.cursor = 'default'
