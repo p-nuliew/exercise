@@ -107,7 +107,7 @@ function renderKLineChart (
   // }
 
   const COLOR = {
-    PRIMARY: '#4180E0',
+    PRIMARY: '#365FAD',
     RED: '#EB5454',
     GREEN: '#46B262',
     LINE: '#FFF',
@@ -410,6 +410,7 @@ function renderKLineChart (
       if (i > 0 && i < controlPoint.length) {
         const prevNode = controlPoint[i - 1]
         ctx.bezierCurveTo(prevNode.nextControlX, prevNode.nextControlY, prevControlX, prevControlY, curX, curY);
+        ctx.strokeStyle = COLOR.PRIMARY
       } else if ( i === 0) {
         ctx.moveTo(curX, curY);
       }
