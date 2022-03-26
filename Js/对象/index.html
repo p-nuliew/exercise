@@ -17,10 +17,11 @@
     obj['tom'] = 4
     obj[Symbol(1)] = 44
 
-    //填入Object的元素key是自动按照字符串排序的，数字排在前面，且升序拍戏，字符串在后
+    //填入Object的元素key是自动按照字符串排序的，数字排在前面，且升序排序，字符串在后
+    // for...in 不可遍历Symbol类型的属性
     for(let k in obj){
         console.log(k) // 0 1 2 5 jack tom
-        // console.log(typeof k); // 都是string，因为都会调用对象的toString()方法
+        console.log(typeof k); // 都是string，因为都会调用对象的toString()方法
     }
 
   </script>
