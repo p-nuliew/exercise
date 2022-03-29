@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>验证会阻塞render 树的渲染</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      h1 {
+        color: red !important
+      }
+    </style>
+    <script>
+      function h () {
+        // 如果打印结果不是空数组，说明h1已解析完成。所以css的加载不会阻塞HTML的解析
+        console.log('h1', document.querySelectorAll('h1'))
+      }
+      setTimeout(h, 0)
+    </script>
+    <link href="https://cdn.bootcss.com/bootstrap/4.0.0-alpha.6/css/bootstrap.css" rel="stylesheet">
+  </head>
+  <body>
+    <!-- 样式文件加载完毕之前，h1并没有显示在页面上。所以css的加载会阻塞render树的渲染 -->
+    <h1>这是红色的</h1>
+  </body>
+</html>
