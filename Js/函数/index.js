@@ -17,17 +17,17 @@ const f = setTimeout(function timer () {}, 1000)  // 具名的
 // 立即执行函数表达式(IIFE)
 // 两种写法同种意思，看个人喜好
 // 写法一
-(function () {
-  console.log(12);
-}())
+// (function () {
+//   console.log(12);
+// }())
 
-(function () {
-  console.log(23);
-})()
+// (function () {
+//   console.log(23);
+// })()
 
-// 写法二
-(function () {}())
-(function IIFE () {}())
+// // 写法二
+// (function () {}())
+// (function IIFE () {}())
 
 var obj = {
   a: 1,

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    // 实现一个带记忆的高阶函数
+    // 每次调用函数传入的参数一样时，只让函数执行一次，且返回相同的结果
+    function add(a, b) {
+      console.log('add 执行了');
+      return a + b
+    }
+
+    function memorize (fn) {
+      const cache = {}
+      return function (...args) {
+        const key = JSON.stringify(args)
+        console.log(typeof key);  // string
+        if (!cache[key]) {
+          cache[key] = fn(...args)
+        }
+        return cache[key]
+      }
+    }
+
+    const addWithMemorize = memorize(add)
+    console.log(addWithMemorize(10, 20));
+    console.log(addWithMemorize(10, 20));
+    console.log(addWithMemorize(10, 20));
+    // 为什么cache的结果不会随memorize执行上下文的出栈而回收？
+    // 因为 addWithMemorize 引用了闭包对象，使闭包对象存保在堆内存中没被销毁。闭包对象没被销毁，cache 自然没被回收。
+
+  </script>
+</body>
+</html>
