@@ -111,3 +111,14 @@ function Child5() {
 }
 var c = new Child5();
 console.log("c: ", c);
+
+
+// apply 练习
+// 1. 将数组各项添加到另一个数组
+var array = ['a', 'b'];
+var elements = [0, 1, 2];
+// [].push.apply(array, elements);
+// console.info(array); // ["a", "b", 0, 1, 2]
+
+[].push.apply(array);
+console.info(array); // ["a", "b"]
