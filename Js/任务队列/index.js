@@ -17,21 +17,21 @@
 // 当所有微任务执行完毕之后，循环再次从宏任务开始，找到其中一个任务队列，执行完毕，再执行所有的微任务，这样一直循环下去
 
 // 看个例子：
-setTimeout(function () {
-  console.log("timeout1");
-});
+// setTimeout(function () {
+//   console.log("timeout1");
+// });
 
-new Promise(function (resolve) {
-  console.log("promise1");
-  for (var i = 0; i < 1000; i++) {
-    i == 99 && resolve();
-  }
-  console.log("promise2");
-}).then(function () {
-  console.log("then1");
-});
+// new Promise(function (resolve) {
+//   console.log("promise1");
+//   for (var i = 0; i < 1000; i++) {
+//     i == 99 && resolve();
+//   }
+//   console.log("promise2");
+// }).then(function () {
+//   console.log("then1");
+// });
 
-console.log("global1");
+// console.log("global1");
 
 // 假设把打印的名字当作任务的名称
 
@@ -45,3 +45,4 @@ console.log("global1");
 
 // 注意：
 // 如果在执行setTimeout任务中遇到setTimeout时，它仍然会将对应的任务发分到setTimeout队里中去，但是该任务就得等到下一轮事件循环执行了。
+
