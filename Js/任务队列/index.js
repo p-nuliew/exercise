@@ -5,7 +5,7 @@
 // 任务队列是先进先出
 // 事件循环的顺序，决定了js代码的执行顺序
 // 任务可以分为宏任务和微任务
-// 宏任务(macro-task)：script(整体代码)、setTimeout、setInterval、ui rendering、setImmediate(node), I/O（一般为ajax，读文件等）
+// 宏任务(macro-task)：script(整体代码)、setTimeout、setInterval、ui rendering、setImmediate(node), I/O（鼠标/键盘事件，读文件等）
 // 微任务(micro-task)：process.nextTick(node)、promise、mutationObserver(html5新特性)
 // 来自不同任务源的任务会进入到不同的任务队列。其中 setTimeout 与 setInterval 是同源的
 // js线程是唯一的，执行队列可以是多个的
