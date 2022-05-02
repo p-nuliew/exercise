@@ -126,19 +126,19 @@
 //   console.log('error', error)
 // })
 
-const p3 = new Promise(function(resolve, reject) {
-  setTimeout(() => {
-    resolve(123)
-  }, 1000)
-})
-p3
-.then(result => {
-  console.log(result)
-  throw new Error('is err')
-})
-.catch(error => {
-  console.log('error', error)
-})
+// const p3 = new Promise(function(resolve, reject) {
+//   setTimeout(() => {
+//     resolve(123)
+//   }, 1000)
+// })
+// p3
+// .then(result => {
+//   console.log(result)
+//   throw new Error('is err')
+// })
+// .catch(error => {
+//   console.log('error', error)
+// })
 
 // Promise没有报错，跳过了catch()方法，直接执行后面的then()方法。此时，要是then()方法里面报错，就跟前面的catch()无关了。
 // Promise.resolve()
@@ -325,6 +325,79 @@ p3
 //     }, Math.random() * 1000)
 //   })
 // }
+
+// 使用 Promise 封装一个加载图片的函数
+// function imageLoad(url) {
+//   const img = new Image()
+//   img.src = url
+
+//   return new Promise(function (resolve, reject) {
+//     img.onload = function () {
+//       resolve('图片加载成功')
+//     }
+
+//     img.onerror = function () {
+//       reject('图片加载失败')
+//     }
+//   })
+// }
+
+// imageLoad('xxx.png').then(res => {
+//   alert(res)
+// }).catch(err => {
+//   alert(err)
+// })
+
+// 手写一个简单的 Promise
+
+class MyPromise {
+  constructor(executor) {
+    this.thenCallback = null
+    this.rejectCallback = null
+    executor(this._resolve.bind(this), this._reject.bind(this))
+  }
+
+  _resolve (value) {
+    // this.thenCallback(value)
+    setTimeout(() => {
+      this.thenCallback(value)
+    }, 0);
+  }
+
+  _reject (value) {
+    // this.rejectCallback(value)
+    setTimeout(() => {
+      this.rejectCallback(value)
+    }, 0)
+  }
+
+  then (then_cb, onRejected) {
+    this.thenCallback = then_cb
+    this.rejectCallback = onRejected
+  }
+
+  catch(onRejected) {
+    this.then(null, onRejected)
+  }
+}
+
+const p = new MyPromise((resolve, reject) => {
+  // setTimeout(() => {
+  //   resolve('123')
+  //   // reject('some err')
+  // }, 1000)
+  resolve('123')  // 如果 then_cb 没有放在队列中，这里会报错 this.thenCallback is not a function
+})
+
+p.then(res => {
+  console.log(res);
+})
+console.log('next code');
+
+
+// p.catch(err => [
+//   console.log('err', err)
+// ])
 
 
 // // 手写Promise.all
