@@ -104,11 +104,41 @@
 //   console.log(error)
 // })
 
+
+
 // Promise.prototype.catch()：用于指定发生错误时的回调
 // Promise.prototype.catch 是 Promise.prototype.then(null, rejection) 或 .then(undefined, '')的别名
 // Promise 对象的错误具有'冒泡'性质，直到被捕获为止，也就是说错误总会被下一个catch捕获
 // .then运行中抛出错误也会被catch()捕获，所以建议使用catch()捕获错误，也更接近同步的写法（try/catch），而不是使用then()的第二个参数
 // reject() 等同于抛出错误，但如果在resolve()之后抛出，不会被捕获，因为状态已定型
+
+// .then运行中抛出错误也会被catch()捕获，所以建议使用catch()捕获错误。但是使用 then 的第二个参数，并不能捕获到第一个参数抛出的错误
+// const p3 = new Promise(function(resolve, reject) {
+//   setTimeout(() => {
+//     resolve(123)
+//   }, 1000)
+// })
+// p3
+// .then(result => {
+//   console.log(result)
+//   throw new Error('is err')
+// }, error => {
+//   console.log('error', error)
+// })
+
+const p3 = new Promise(function(resolve, reject) {
+  setTimeout(() => {
+    resolve(123)
+  }, 1000)
+})
+p3
+.then(result => {
+  console.log(result)
+  throw new Error('is err')
+})
+.catch(error => {
+  console.log('error', error)
+})
 
 // Promise没有报错，跳过了catch()方法，直接执行后面的then()方法。此时，要是then()方法里面报错，就跟前面的catch()无关了。
 // Promise.resolve()
@@ -143,7 +173,7 @@
 // const p = Promise.all([p1, p2, p3]);
 // p的状态由p1、p2、p3决定，分两种情况
 // 1.p1、p2、p3的状态都变成fulfilled，p的状态才会变成fulfilled，此时他们的返回值组成一个数组，传递给回调函数
-// 2.只有p1、p2、p3之中的一个被rejected，p的状态就会变成rejecetd，第一个被reject的实例的返回值会传递给回调函数
+// 2.只有p1、p2、p3之中的一个被rejected，p的状态就会变成rejected，第一个被reject的实例的返回值会传递给回调函数
 
 // 如果作为参数的Promise实例，自己定义了catch方法，那么它一旦被rejected，并不会触发Promise.all()的catch()方法
 // const p5 = new Promise(function(resolve) {
@@ -185,23 +215,23 @@
 // 只要p1、p2、p3之中有一个实例率先改变状态，p的状态就跟着改变，那个率先改变的Promise实例的返回值，就传递给P的回调函数
 
 // 如果 5 秒之内请求无法返回结果，变量p的状态就会变为rejected，从而触发catch方法指定的回调函数
-Promise.race([
-  new Promise((resolve, reject) => {
-    // 模拟请求，10秒后返回数据
-    setTimeout(resolve, 10000, "my name is a");
-  }),
-  new Promise(function (resolve, reject) {
-    // 处理请求超时
-    setTimeout(reject, 5000, new Error('超时了'));
-  }),
-])
-.then((res) => {
-  console.log(res);
-})
-.catch((err) => {
-  console.log('err: ', err);
-  alert(err);
-});
+// Promise.race([
+//   new Promise((resolve, reject) => {
+//     // 模拟请求，10秒后返回数据
+//     setTimeout(resolve, 10000, "my name is a");
+//   }),
+//   new Promise(function (resolve, reject) {
+//     // 处理请求超时
+//     setTimeout(reject, 5000, new Error('超时了'));
+//   }),
+// ])
+// .then((res) => {
+//   console.log(res);
+// })
+// .catch((err) => {
+//   console.log('err: ', err);
+//   alert(err);
+// });
 
 
 
@@ -267,63 +297,65 @@ Promise.race([
 // catch方法的参数不是reject抛出的“出错了”这个字符串，而是thenable对象
 
 // 按顺序完成异步操作
-function logInOrder(urls) {
-  // 远程读取所有URL
-  const textPromises = urls.map((url) => {
-    return new Promise((resolved, reject) => {
-      setTimeout(resolved, url * 1000, url);
-    });
-  });
-  console.log("textPromises: ", textPromises);
+// function logInOrder(urls) {
+//   // 远程读取所有URL
+//   const textPromises = urls.map((url) => {
+//     return new Promise((resolved, reject) => {
+//       setTimeout(resolved, url * 1000, url);
+//     });
+//   });
+//   console.log("textPromises: ", textPromises);
 
-  // 按次序输出
-  textPromises.reduce((chain, textPromise) => {
-    console.log("chain, textPromise: ", chain, textPromise);
-    return chain.then(() => textPromise).then((text) => console.log(text));
-  }, Promise.resolve());
-}
+//   // 按次序输出
+//   textPromises.reduce((chain, textPromise) => {
+//     console.log("chain, textPromise: ", chain, textPromise);
+//     return chain.then(() => textPromise).then((text) => console.log(text));
+//   }, Promise.resolve());
+// }
 
-logInOrder([1, 3, 2]);
-
-
-// 模拟异步
-const delay = (data) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      resolve(data)
-      console.log('data: ', data);
-    }, Math.random() * 1000)
-  })
-}
+// logInOrder([1, 3, 2]);
 
 
-// 手写Promise.all
-Promise._all = (array) => {
-  return new Promise((resolve, reject) => {
-    let count = 0;
-    const result = []
-    for (let i = 0, len = array.length; i < len; i++) {
-      array[i].then((data) => {
-        result[i] = data
-        count++
-        // 因为array[i]的执行是异步的，所以这种判断是错误的
-        // 如果i===2的promise先执行完毕,result[2]导致result.length === 3
-        // if (result.length === array.length) {
-        //   resolve(result)
-        // }
-        if (count === array.length) {
-          resolve(result)
-        }
-      }, reject)
-    }
-  })
-}
+// // 模拟异步
+// const delay = (data) => {
+//   return new Promise((resolve, reject) => {
+//     setTimeout(() => {
+//       resolve(data)
+//       console.log('data: ', data);
+//     }, Math.random() * 1000)
+//   })
+// }
 
-// const p1 = delay(1)
-// const p2 = delay(2)
-// const p3 = delay(3)
-Promise._all([delay(2), delay(1), delay(3)]).then(res => {
-  console.log('res: ', res);
-}, (err) => {
-  console.log('err: ', err);
-})
+
+// // 手写Promise.all
+// Promise._all = (array) => {
+//   return new Promise((resolve, reject) => {
+//     let count = 0;
+//     const result = []
+//     for (let i = 0, len = array.length; i < len; i++) {
+//       array[i].then((data) => {
+//         result[i] = data
+//         count++
+//         // 因为array[i]的执行是异步的，所以这种判断是错误的
+//         // 如果i===2的promise先执行完毕,result[2]导致result.length === 3
+//         // if (result.length === array.length) {
+//         //   resolve(result)
+//         // }
+//         if (count === array.length) {
+//           resolve(result)
+//         }
+//       }, reject)
+//     }
+//   })
+// }
+
+// // const p1 = delay(1)
+// // const p2 = delay(2)
+// // const p3 = delay(3)
+// Promise._all([delay(2), delay(1), delay(3)]).then(res => {
+//   console.log('res: ', res);
+// }, (err) => {
+//   console.log('err: ', err);
+// })
+
+
