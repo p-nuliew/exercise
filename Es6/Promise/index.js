@@ -317,14 +317,13 @@
 
 
 // // 模拟异步
-// const delay = (data) => {
-//   return new Promise((resolve, reject) => {
-//     setTimeout(() => {
-//       resolve(data)
-//       console.log('data: ', data);
-//     }, Math.random() * 1000)
-//   })
-// }
+const delay = (data) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(data)
+    }, Math.random() * 1000)
+  })
+}
 
 // 使用 Promise 封装一个加载图片的函数
 // function imageLoad(url) {
@@ -350,50 +349,49 @@
 
 // 手写一个简单的 Promise
 
-class MyPromise {
-  constructor(executor) {
-    this.thenCallback = null
-    this.rejectCallback = null
-    executor(this._resolve.bind(this), this._reject.bind(this))
-  }
+// class MyPromise {
+//   constructor(executor) {
+//     this.thenCallback = null
+//     this.rejectCallback = null
+//     executor(this._resolve.bind(this), this._reject.bind(this))
+//   }
 
-  _resolve (value) {
-    // this.thenCallback(value)
-    setTimeout(() => {
-      this.thenCallback(value)
-    }, 0);
-  }
+//   _resolve (value) {
+//     // this.thenCallback(value)
+//     setTimeout(() => {
+//       this.thenCallback(value)
+//     }, 0);
+//   }
 
-  _reject (value) {
-    // this.rejectCallback(value)
-    setTimeout(() => {
-      this.rejectCallback(value)
-    }, 0)
-  }
+//   _reject (value) {
+//     // this.rejectCallback(value)
+//     setTimeout(() => {
+//       this.rejectCallback(value)
+//     }, 0)
+//   }
 
-  then (then_cb, onRejected) {
-    this.thenCallback = then_cb
-    this.rejectCallback = onRejected
-  }
+//   then (then_cb, onRejected) {
+//     this.thenCallback = then_cb
+//     this.rejectCallback = onRejected
+//   }
 
-  catch(onRejected) {
-    this.then(null, onRejected)
-  }
-}
+//   catch(onRejected) {
+//     this.then(null, onRejected)
+//   }
+// }
 
-const p = new MyPromise((resolve, reject) => {
-  // setTimeout(() => {
-  //   resolve('123')
-  //   // reject('some err')
-  // }, 1000)
-  resolve('123')  // 如果 then_cb 没有放在队列中，这里会报错 this.thenCallback is not a function
-})
+// const p = new MyPromise((resolve, reject) => {
+//   // setTimeout(() => {
+//   //   resolve('123')
+//   //   // reject('some err')
+//   // }, 1000)
+//   resolve('123')  // 如果 then_cb 没有放在队列中，这里会报错 this.thenCallback is not a function
+// })
 
-p.then(res => {
-  console.log(res);
-})
-console.log('next code');
-
+// p.then(res => {
+//   console.log(res);
+// })
+// console.log('next code');
 
 // p.catch(err => [
 //   console.log('err', err)
@@ -401,34 +399,34 @@ console.log('next code');
 
 
 // // 手写Promise.all
-// Promise._all = (array) => {
-//   return new Promise((resolve, reject) => {
-//     let count = 0;
-//     const result = []
-//     for (let i = 0, len = array.length; i < len; i++) {
-//       array[i].then((data) => {
-//         result[i] = data
-//         count++
-//         // 因为array[i]的执行是异步的，所以这种判断是错误的
-//         // 如果i===2的promise先执行完毕,result[2]导致result.length === 3
-//         // if (result.length === array.length) {
-//         //   resolve(result)
-//         // }
-//         if (count === array.length) {
-//           resolve(result)
-//         }
-//       }, reject)
-//     }
-//   })
-// }
+Promise._all = (array) => {
+  return new Promise((resolve, reject) => {
+    let count = 0;
+    const result = []
+    for (let i = 0, len = array.length; i < len; i++) {
+      array[i].then((data) => {
+        result[i] = data
+        count++
+        // 因为array[i]的执行是异步的，所以这种判断是错误的
+        // 如果i===2的promise先执行完毕,result[2]导致result.length === 3
+        // if (result.length === array.length) {
+        //   resolve(result)
+        // }
+        if (count === array.length) {
+          resolve(result)
+        }
+      }, reject)
+    }
+  })
+}
 
-// // const p1 = delay(1)
-// // const p2 = delay(2)
-// // const p3 = delay(3)
-// Promise._all([delay(2), delay(1), delay(3)]).then(res => {
-//   console.log('res: ', res);
-// }, (err) => {
-//   console.log('err: ', err);
-// })
+const p1 = delay(1)
+const p2 = delay(2)
+const p3 = delay(3)
+Promise._all([delay(2), delay(1), delay(3)]).then(res => {
+  console.log('res: ', res);
+}, (err) => {
+  console.log('err: ', err);
+})
 
 
