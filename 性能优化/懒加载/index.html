@@ -33,7 +33,7 @@
     // 判断元素是否在可视范围内
     function elementInViewport(element) {
         const rect = element.getBoundingClientRect();
-        return (rect.top >= 0 && rect.left >= 0 && rect.top <= (window.innerHeight || document.documentElement.clientHeight));
+        return ((rect.top >= 0 || rect.bottom >= 0) && (rect.left >= 0 || rect.right >= 0) && rect.top <= (window.innerHeight || document.documentElement.clientHeight));
     }
 
     // 将data-src属性设置为真实路径
