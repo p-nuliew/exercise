@@ -317,13 +317,13 @@
 
 
 // // 模拟异步
-const delay = (data) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      resolve(data)
-    }, Math.random() * 1000)
-  })
-}
+// const delay = (data) => {
+//   return new Promise((resolve, reject) => {
+//     setTimeout(() => {
+//       resolve(data)
+//     }, Math.random() * 1000)
+//   })
+// }
 
 // 使用 Promise 封装一个加载图片的函数
 // function imageLoad(url) {
@@ -399,34 +399,108 @@ const delay = (data) => {
 
 
 // // 手写Promise.all
-Promise._all = (array) => {
-  return new Promise((resolve, reject) => {
-    let count = 0;
-    const result = []
-    for (let i = 0, len = array.length; i < len; i++) {
-      array[i].then((data) => {
-        result[i] = data
-        count++
-        // 因为array[i]的执行是异步的，所以这种判断是错误的
-        // 如果i===2的promise先执行完毕,result[2]导致result.length === 3
-        // if (result.length === array.length) {
-        //   resolve(result)
-        // }
-        if (count === array.length) {
-          resolve(result)
-        }
-      }, reject)
-    }
-  })
+// Promise._all = (array) => {
+//   return new Promise((resolve, reject) => {
+//     let count = 0;
+//     const result = []
+//     for (let i = 0, len = array.length; i < len; i++) {
+//       array[i].then((data) => {
+//         result[i] = data
+//         count++
+//         // 因为array[i]的执行是异步的，所以这种判断是错误的
+//         // 如果i===2的promise先执行完毕,result[2]导致result.length === 3
+//         // if (result.length === array.length) {
+//         //   resolve(result)
+//         // }
+//         if (count === array.length) {
+//           resolve(result)
+//         }
+//       }, reject)
+//     }
+//   })
+// }
+
+// const p1 = delay(1)
+// const p2 = delay(2)
+// const p3 = delay(3)
+// Promise._all([delay(2), delay(1), delay(3)]).then(res => {
+//   console.log('res: ', res);
+// }, (err) => {
+//   console.log('err: ', err);
+// })
+
+
+// 设计任务队列，控制请求最大并发数
+// 场景：前端页面中需要同时发送20个请求，但是服务端有限制，
+//      需要前端控制并发数，保证最多只能同时发送10个请求
+
+// 要求：
+// 1. 最多同时执行的任务书为10个
+// 2. 当前任务执行完，释放列队空间，自动执行下一个任务
+// 3. 所有任务添加到任务队列后，自动开始执行任务
+
+// 实现思路：
+const createTask = (i) => {
+  return () => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve(i)
+      }, 2 * 1000)
+    })
+  }
 }
 
-const p1 = delay(1)
-const p2 = delay(2)
-const p3 = delay(3)
-Promise._all([delay(2), delay(1), delay(3)]).then(res => {
-  console.log('res: ', res);
-}, (err) => {
-  console.log('err: ', err);
-})
+class TaskQueue {
+  constructor() {
+    this.taskList = [] // 模拟任务队列
+    this.max = 3 // 最大请求数
+
+    setTimeout(() => {
+      this.run()
+    })
+  }
+
+  addTask (task) {
+    this.taskList.push(task)
+  }
+  run () {
+    const taskLength = this.taskList.length
+    if (!taskLength) return
+
+    const min = Math.min(this.max, taskLength)
+    for (let i = 0; i < min; i++) {
+      // 开始占用一个任务空间
+      this.max--
+      console.log('this.max: ', this.max);
+      const task = this.taskList.shift() // 先进的先执行
+      task().then(res => {
+        // console.log(res);
+      }).catch(err => {
+        console.error(err);
+      }).finally(() => {
+        // 释放一个任务空间
+        this.max++
+        this.run()
+      })
+    }
+  }
+}
+
+const taskQueue = new TaskQueue()
+for (let i = 0; i < 20; i++) {
+  const task = createTask(i)
+  taskQueue.addTask(task)
+}
+
+// 第一轮循环
+// taskList = [...]
+
+//第二次遇到setTimeout
+// 开始执行 run
+
+
+
+
+
 
 
