@@ -60,3 +60,14 @@ nodeChild.addEventListener('click', function (e) {
 
   console.log('offsetX, offsetY: ', offsetX, offsetY);
 }, false)
+
+// 创建自定义事件
+let myEvent = new Event('build')
+
+// 在 elem 上 dispatchEvent
+const elem = document.querySelector('#elem')
+elem.addEventListener('build', function () {
+  alert('build')
+})
+
+elem.dispatchEvent(myEvent)
