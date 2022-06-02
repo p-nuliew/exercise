@@ -66,8 +66,21 @@ let myEvent = new Event('build')
 
 // 在 elem 上 dispatchEvent
 const elem = document.querySelector('#elem')
-elem.addEventListener('build', function () {
+elem.addEventListener('build', function (e) {
   alert('build')
 })
 
 elem.dispatchEvent(myEvent)
+
+
+// 传递自定义数据-CustomEvent
+// 可用于传参
+let myCustomEvent = new CustomEvent('custom build', {
+  'detail': '传递自定义数据'
+})
+// 在 elem 上 dispatchEvent
+elem.addEventListener('custom build', function (e) {
+  alert(e.detail)
+})
+
+elem.dispatchEvent(myCustomEvent)
