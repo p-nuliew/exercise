@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>事件</title>
+</head>
+<body>
+  <div>使用页面事件的4种方式</div>
+  <span onclick="alert('我被点了 ------ 请勿使用这种方式')">点我1</span>
+  <span onclick="clickMe()">点我2</span>
+  <button class="btn3">点我3</button>
+  <button class="btn4">点我3</button>
+
+  <script>
+    //使用页面事件的4种方式
+    function clickMe() {
+      alert("我也被点了----- 也请勿使用这种方式，1.html和js不分离 2. 试想一下，如果有100个按钮呢？")
+    }
+
+    document.querySelector('.btn3').onclick = function() {
+      alert('我也也被点了啊 ------ 这种方式不错，但不是最好的, 多次绑定onclick，只有最后一次会生效')
+    }
+    document.querySelector('.btn3').onclick = function() {
+      alert('我也也被点了啊，我是最后一次绑定 ------ 这种方式不错，兼容性较好，但在DOM Level 2 中，虽然更强大了但支持不足, 多次绑定onclick，只有最后一次会生效')
+    }
+
+    document.querySelector('.btn4').addEventListener('click', function() {
+      alert('我也也也被点了 ------- 推荐这种，有 removeEventListener 可以移除监听，而且可以监听多个函数，多个函数都会工作')
+    })
+    // window.removeEventListener('click', listener)
+
+
+    // 捕获和冒泡
+    // 捕获：
+        // 从html元素开始查找，是否在捕获阶段中注册了一个onclick事件处理器，如果是则运行它
+        // 然后移动到html中单级元素的下一个祖先元素，并执行相同的操作，以此类推，直到实际点击的元素
+    // 冒泡：
+        // 从点击元素开始查找，是否在捕获阶段中注册了一个onclick事件处理器，如果是则运行它
+        // 然后移动到点击元素的父元素，并执行相同的操作，以此类推，直到html元素
+
+  </script>
+</body>
+</html>
