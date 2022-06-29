@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <input placeholder="请输入" id="keyword" />
+  <ul id="ul"></ul>
+
+  <script>
+    // 输入框complete功能
+    const inputEl = document.getElementById('keyword')
+    const nodeListData = ['1', '2', '3', '4', '55', '566']
+
+    inputEl.addEventListener('input', function(e) {
+      const _list = nodeListData.filter(x => x.indexOf(e.target.value) > -1)
+      getNode(_list)
+    })
+
+    const liEl = document.createElement('li')
+    const ulEl = document.getElementById('ul')
+
+    function getNode(nodeListData) {
+      nodeListData.forEach((item, index) => {
+        liEl.innerText = item
+        liEl.onclick = function() {
+          inputEl.value = item
+        }
+        ulEl.appendChild(liEl)
+      })
+    }
+
+
+
+    // 求斐波那契数列第n项的值
+    // n
+    // 0 1
+    // 1 1
+
+    // 2 2
+    // 3 3
+    // 4 5
+    // 5 8
+    // 6 13
+    const _map = {}
+    function nValue(n) {
+      if (_map[n]) {
+        return _map[n]
+      }
+
+      let value = ''
+      if (n === 0 || n === 1) {
+        return 1
+      }
+      _map[n] = nValue(n-1) + nValue(n-2)
+      return _map[n]
+    }
+    console.log('---', nValue(900));
+  </script>
+</body>
+</html>
