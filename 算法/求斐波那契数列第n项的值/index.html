@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    // 求斐波那契数列第n项的值
+    // 1. 找规律
+    // 2. 优化：使用对象的唯一属性特性缓存已计算的结果
+    // n
+    // 0 1
+    // 1 1
+
+    // 2 2
+    // 3 3
+    // 4 5
+    // 5 8
+    // 6 13
+    const _map = {}
+    function nValue(n) {
+      if (_map[n]) {
+        return _map[n]
+      }
+
+      let value = ''
+      if (n === 0 || n === 1) {
+        return 1
+      }
+      _map[n] = nValue(n-1) + nValue(n-2)
+      return _map[n]
+    }
+    console.log('---', nValue(900));
+  </script>
+</body>
+</html>
