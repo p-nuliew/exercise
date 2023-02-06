@@ -84,3 +84,12 @@ elem.addEventListener('custom build', function (e) {
 })
 
 elem.dispatchEvent(myCustomEvent)
+
+window.addEventListener('pageshow', function (event) {
+  console.log('event.persisted: ', event.persisted);
+  if(event.persisted || window.performance && window.performance.navigation.type == 2){
+
+      console.log('window.performance.navigation.type: '+ window.performance.navigation.type)
+      // location.refresh();   //此处可以写你的实际应用的代码
+  }
+},false)

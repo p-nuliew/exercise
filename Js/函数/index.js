@@ -31,9 +31,11 @@ const f = setTimeout(function timer () {}, 1000)  // 具名的
 
 var obj = {
   a: 1,
+  // 增强函数 es6
   fn () {
     console.log('fn');
   },
+  // 增强函数 es5
   fn1: function () {
     console.log('fn1');
   },
