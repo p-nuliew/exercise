@@ -1,44 +1,18 @@
-function sort(arr) {
-  var sum1 = 0;
-  var sum2 = 0;
-  for (var j = 0; j < arr.length - 1; j++) {
-    // 声明一个变量，作为标志位
-    var done = true;
-    for (var i = 0; i < arr.length - 1 - j; i++) {
-      if (arr[i] > arr[i + 1]) {
-        var temp = arr[i];
-        arr[i] = arr[i + 1];
-        arr[i + 1] = temp;
-        done = false;
-      }
-      sum1++;
-    }
-    if (done) break;
-    sum2++;
-  }
-  console.log(sum1);
-  console.log(sum2);
-  return arr;
-}
-
-console.log(sort([1, 2, 4, 3]));
-
-function sort2(arr) {
-  var length = arr.length;
-  var done = true; // 设置一个标志位，如果不需要排序则跳出循环
-  for (var j = 0; j < length - 1; j++) {
-    for (var i = 0; i < length - 1 - j; i++) {
-      //
-      if (arr[i] > arr[i + 1]) {
-        var temp = arr[i + 1];
-        arr[i + 1] = arr[i];
-        arr[i] = temp;
-        done = false;
+// 1. 比较相邻的元素，如果第一个比第二个大，则交换他们。第一遍遍历完之后，最后的元素肯定是最大的数。所以内循环可以-i
+// 2. 重复以上步骤，除了最后一个（所以比较次数为length-1）
+function sort3(arr) {
+  const length = arr.length;
+  let done = true;  // 用于优化：如果在当前趟中没有发生交换，说明该序列已经有序
+  for (let i = 0; i < length - 1; i++) {
+    for(let j = 0; j < length - i - 1; j++) {
+      if (arr[j] > arr[j + 1]) {
+        [arr[j], arr[j+1]] = [arr[j + 1], arr[j]]
+        done = false
       }
     }
-    if (done) break;
+    if (done) break
   }
-  return arr;
+  return arr
 }
 
-console.log(sort2([1, 2, 3, 4]));
+console.log(sort3([1, 3, 2, 5, 4]));
