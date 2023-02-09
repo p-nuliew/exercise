@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    // 输入一组列表如下，转化成树形结构
+    // 输入
+    // [
+    //   { id: 1, title: "child1", parentId: 0 },
+    //   { id: 2, title: "child2", parentId: 0 },
+    //   { id: 3, title: "child1_1", parentId: 1 },
+    //   { id: 4, title: "child1_2", parentId: 1 },
+    //   { id: 5, title: "child2_1", parentId: 2 }
+    // ]
+    // 输出
+    // tree=[
+    //   {
+    //     "id": 1,
+    //     "title": "child1",
+    //     "parentId": 0,
+    //     "children": [
+    //       {
+    //         "id": 3,
+    //         "title": "child1_1",
+    //         "parentId": 1
+    //       },
+    //       {
+    //         "id": 4,
+    //         "title": "child1_2",
+    //         "parentId": 1
+    //       }
+    //     ]
+    //   },
+    //   {
+    //     "id": 2,
+    //     "title": "child2",
+    //     "parentId": 0,
+    //     "children": [
+    //       {
+    //         "id": 5,
+    //         "title": "child2_1",
+    //         "parentId": 2
+    //       }
+    //     ]
+    //   }
+    // ]
+
+    function listToTree(list) {
+      const treeData = [];
+      const map = {}
+
+      // 将list转为map结构，空间换时间。key为id，值为数据
+      list.forEach(item => {
+        map[item.id] = item
+      })
+
+      console.log('map', map);
+      // 遍历map，如果map[key].parentId存在，说明存在父级
+      // 存在父级，往父级map[pid]的children中扔
+      // 不存在父级，说明是根节点，直接往treeData中扔
+      for (const key in map) {
+        const pid = map[key].parentId;
+        if (pid) {
+          if (!map[pid].children) {
+            map[pid].children = []
+          }
+          map[pid].children.push(map[key])
+        } else {
+          treeData.push(map[key])
+        }
+      }
+
+      return treeData
+    }
+
+    const list = [
+      { id: 1, title: "child1", parentId: 0 },
+      { id: 2, title: "child2", parentId: 0 },
+      { id: 3, title: "child1_1", parentId: 1 },
+      { id: 4, title: "child1_2", parentId: 1 },
+      { id: 5, title: "child2_1", parentId: 2, },
+      { id: 6, title: "child3", parentId: 0, }
+    ]
+
+    const tree = listToTree(list)
+    console.log('tree: ', tree);
+
+  </script>
+</body>
+</html>
