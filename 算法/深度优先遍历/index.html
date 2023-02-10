@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    // 对树进行深度优先遍历
+    // 输入tree，输出[1,3,4,2,5]
+    const tree = [
+      {
+        id: 1,
+        title: 'child1',
+        parentId: 0,
+        children: [
+          {
+            id: 3,
+            title: 'child1_1',
+            parentId: 1,
+          },
+          {
+            id: 4,
+            title: 'child1_2',
+            parentId: 1,
+          },
+        ],
+      },
+      {
+        id: 2,
+        title: 'child2',
+        parentId: 0,
+        children: [
+          {
+            id: 5,
+            title: 'child2_1',
+            parentId: 2,
+          },
+        ],
+      },
+    ];
+
+    // 递归版（forEach不能使用for循环代替）
+    {
+      function deepTree(tree, arr = []) {
+        if (!tree || !tree.length) return arr;
+
+        tree.forEach(item => {
+          arr.push(item.id)
+          // 遍历子树
+          item.children && deepTree(item.children, arr)
+        });
+
+        return arr
+      }
+      console.log(deepTree(tree, []));
+    }
+
+    // 非递归版
+    {
+      function deepTree(tree) {
+        if (!tree || !tree.length) return;
+        const arr = [];
+        let stack = [];
+
+        // 第一层入栈
+        for (let i = 0; i < tree.length; i++) {
+          stack.push(tree[i])
+        };
+
+        let node;
+        while(stack.length) {
+          // 获取当前第一个节点
+          node = stack.shift()
+          arr.push(node.id)
+          // 如果该节点有子节点，继续添加进入栈顶
+          if (node.children && node.children.length) {
+            stack = node.children.concat(stack)
+          }
+        }
+
+        return arr
+      }
+      console.log(deepTree(tree, []));
+    }
+  </script>
+</body>
+</html>
