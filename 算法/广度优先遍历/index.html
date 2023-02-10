@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    // 对树进行广度优先遍历
+    // 输入tree，输出[1,2,3,4,5]
+
+    const tree = [
+      {
+        id: 1,
+        title: 'child1',
+        parentId: 0,
+        children: [
+          {
+            id: 3,
+            title: 'child1_1',
+            parentId: 1,
+          },
+          {
+            id: 4,
+            title: 'child1_2',
+            parentId: 1,
+          },
+        ],
+      },
+      {
+        id: 2,
+        title: 'child2',
+        parentId: 0,
+        children: [
+          {
+            id: 5,
+            title: 'child2_1',
+            parentId: 2,
+          },
+        ],
+      },
+    ];
+
+    function rangeTree(tree) {
+      if (!tree || !tree.length) return arr;
+
+      const arr = [];
+      let node, list = [...tree];
+
+      while(node = list.shift()) {
+        arr.push(node.id)
+        node.children && list.push(...node.children)
+      }
+
+      return arr
+    }
+    console.log(rangeTree(tree));
+
+  </script>
+</body>
+</html>

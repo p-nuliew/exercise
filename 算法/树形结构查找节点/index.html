@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    // 查找树结构中符合要求的节点
+    // 输入
+    //     tree
+    //     func： data => data.title === "child2_1"
+    // 输出
+    //      { id: 5, parentId: 2, title: "child2_1" }
+
+    const tree = [
+      {
+        id: 1,
+        title: 'child1',
+        parentId: 0,
+        children: [
+          {
+            id: 3,
+            title: 'child1_1',
+            parentId: 1,
+          },
+          {
+            id: 4,
+            title: 'child1_2',
+            parentId: 1,
+          },
+        ],
+      },
+      {
+        id: 2,
+        title: 'child2',
+        parentId: 0,
+        children: [
+          {
+            id: 5,
+            title: 'child2_1',
+            parentId: 2,
+          },
+        ],
+      },
+    ];
+
+    // {
+    //   function findTreeNode(tree, func) {
+    //     for (let data of tree) {
+    //       if (func(data)) return data;
+    //       if (data.children) {
+    //         const res = findTreeNode(data.children, func)
+    //         // 重点：结果存在再返回
+    //         if (res) return res
+    //       }
+    //     }
+    //     return null
+    //   }
+    //   console.log(findTreeNode(tree, data => data.title === "child2_1"));
+    // }
+
+
+    // 查找符合条件的节点及父节点集合
+    //     tree
+    //     func： data => data.id === 3
+    // 输出
+    // [
+    //   {
+    //     id: 1,
+    //     title: 'child1',
+    //     parentId: 0,
+    //     children: [
+    //       {
+    //         id: 3,
+    //         title: 'child1_1',
+    //         parentId: 1,
+    //       },
+    //       {
+    //         id: 4,
+    //         title: 'child1_2',
+    //         parentId: 1,
+    //       },
+    //     ],
+    //   },
+    //   {
+    //     id: 3,
+    //     title: 'child1_1',
+    //     parentId: 1,
+    //   },
+    // ]
+    {
+      function queryAncestors(arr, func) {
+        const result = [];
+        if (!Array.isArray(arr)) return result;
+
+        function getNode(list) {
+          let match
+          for (let i = 0; i < list.length; i++) {
+            const { id, children } = list[i];
+            result.push(list[i])
+
+            match = func(list[i])
+            // 如果不匹配且存在子节点，重复以上步骤
+            if (!match && children && children.length) {
+              return getNode(children)  // 需要 return 关键字，终止后续逻辑
+            }
+
+            // 如果匹配，跳出循环
+            if (match) {
+              break
+            } else {
+              // 不匹配则删除扔进来的节点
+              result.pop()
+            }
+          }
+        }
+        getNode(arr);
+
+        return result;
+      }
+
+      console.log(queryAncestors(tree, data => data.id === 3));
+    }
+
+
+  </script>
+</body>
+</html>

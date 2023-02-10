@@ -48,6 +48,30 @@
     }
 
 
+    // 统计一个字符串出现最多的字母
+    // afjghdfraaaasdenas
+
+    function getMostLetter(str) {
+      const map = new Map() // 存储key和该key出现的次数，默认出现次数为1
+      for (let i = 0; i < str.length; i++) {
+        const item = str[i];
+        map.set(item, map.has(item) ? map.get(item) + 1 : 1)
+      }
+
+      // 表示出现最多的次数
+      let maxLength = 1;
+      let mostLetter;
+      // 遍历map，如果value大于maxLength，将value赋值给maxLength
+      // 遍历结束，将会得到最大的value
+      for (let [key, value] of map) {
+        if (value > maxLength) {
+          maxLength = value
+          mostLetter = key
+        }
+      }
+      return mostLetter
+    }
+    console.log(getMostLetter('afjghdfraaaasdenas'));
 
   </script>
 </body>
