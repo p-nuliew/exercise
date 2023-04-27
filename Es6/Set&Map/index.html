@@ -6,6 +6,18 @@
   <title>Set&Map</title>
 </head>
 <body>
-  <script src="index.js" ></script>
+  <input type="text" value="2" id="input">
+  <!-- <div id="save">save</div> -->
+  <script>
+    const btn = document.createElement('span')
+    btn.setAttribute('id', 'save')
+    document.body.appendChild(btn)
+
+    btn.addEventListener('click', () => {
+      document.getElementById('input').focus()
+    })
+    btn.click()
+  </script>
+  <!-- <script src="index.js" ></script> -->
 </body>
 </html>

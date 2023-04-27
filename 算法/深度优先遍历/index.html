@@ -9,7 +9,6 @@
 <body>
   <script>
     // 对树进行深度优先遍历
-    // 输入tree，输出[1,3,4,2,5]
     const tree = [
       {
         id: 1,
@@ -42,6 +41,7 @@
       },
     ];
 
+    // 输入tree，输出[1,3,4,2,5]
     // 递归版（forEach不能使用for循环代替）
     {
       function deepTree(tree, arr = []) {
@@ -57,7 +57,6 @@
       }
       console.log(deepTree(tree, []));
     }
-
     // 非递归版
     {
       function deepTree(tree) {
@@ -84,6 +83,22 @@
         return arr
       }
       console.log(deepTree(tree, []));
+    }
+
+    // 添加属性
+    {
+      function deepTree(tree) {
+        tree.map((item) => {
+          const isMatch = item.key === node.key;
+          if (isMatch) {
+            item.expand = !item.expand;
+          }
+          // 遍历子树
+          item.children && deepTree(item.children);
+        });
+        // 注意这里要返回处理好的tree
+        return tree;
+      }
     }
   </script>
 </body>
