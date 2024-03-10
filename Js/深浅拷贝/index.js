@@ -9,8 +9,8 @@
 // let obj2 = {};
 // Object.assign(obj2, obj1);
 // obj1.a.b = 2;
-// console.log({ obj1 });
-// console.log({ obj2 });
+// console.log({ obj1 });  // { a: { b: 2 }, sym: Symbol(1), innumerable: "不可枚举属性" }
+// console.log({ obj2 });  // { a: { b: 2 }, sym: Symbol(1) }
 
 // 注意点:
 // 1：他不会拷贝对象的继承属性
@@ -26,6 +26,18 @@
 // 方法四 slice
 // 浅拷贝数组，仅仅针对数组类型，
 // 类数组可以使用 Object.prototype.slice.call(arr):从Array中获取slice，绑定到arr中，并执行slice
+
+const array1 = [
+  { id: 1, name: 'zhangsan' },
+  { id: 2, name: 'lisi' },
+]
+// const cloneArray1 = [...array1]
+// const cloneArray1 = Object.assign(array1)
+// const cloneArray1 = array1.concat([])
+const cloneArray1 = array1.slice()
+cloneArray1[0].name = 'wangwu'
+console.log('array1', array1);
+console.log('cloneArray1', cloneArray1);
 
 // 手工浅拷贝
 function shallowClone(obj) {
@@ -75,8 +87,8 @@ Object.defineProperty(obj1, "innumerable", {
   value: "innumerable",
 });
 console.log("obj1", obj1);
-let obj2 = JSON.parse(JSON.stringify(obj1));
-console.log("obj2", obj2);
+let obj22 = JSON.parse(JSON.stringify(obj1));
+console.log("obj22", obj22);
 
 // 基础版(手写递归)
 
