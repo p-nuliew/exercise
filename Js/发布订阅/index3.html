@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>发布订阅</title>
+</head>
+
+<body>
+  <button id="btn">update</button>
+
+  avatar: <img src="" alt="" id="avatar"><br />
+  name: <input type="text" id="name"><br />
+  age: <input type="text" id="age">
+
+  <script type="module">
+    import { on, getState, setState } from './index3.js';
+
+    window.addEventListener('DOMContentLoaded', () => {
+      console.log('窗口准备完毕');
+      document.getElementById('btn').addEventListener('click', () => {
+        setState({
+          userInfo: { name: Math.random(), age: Math.random() },
+          avatar: 'https://raw.githubusercontent.com/Chanzhaoyu/chatgpt-web/main/src/assets/avatar.jpg'
+        })
+      })
+
+      on('userInfo', () => {
+        const userInfo = getState('userInfo')
+        document.getElementById('name').value = userInfo.name
+        document.getElementById('age').value = userInfo.age
+      })
+
+      on('avatar', () => {
+        document.getElementById('avatar').src = getState('avatar')
+      })
+    })
+  </script>
+</body>
+
+</html>

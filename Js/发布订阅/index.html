@@ -14,22 +14,22 @@
   y: <input type="text" id="inputY">
 
   <script type="module">
-    import { on, getPosition, setPosition } from './index.js';
+    import { on, getState, setState } from './index3.js';
 
     window.addEventListener('DOMContentLoaded', () => {
       console.log('窗口准备完毕');
       document.getElementById('btn').addEventListener('click', () => {
-        setPosition({x: Math.random(), y: Math.random()})
+        setState({x: Math.random(), y: Math.random()})
       })
 
       // 订阅事件
       on('x', () => {
         const inputEl = document.getElementById('inputX')
-        inputEl.value = getPosition('x')
+        inputEl.value = getState('x')
       })
       on('y', () => {
         const inputEl = document.getElementById('inputY')
-        inputEl.value = getPosition('y')
+        inputEl.value = getState('y')
       })
     })
   </script>
