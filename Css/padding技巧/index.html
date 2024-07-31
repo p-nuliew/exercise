@@ -1,34 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Responsive Img Container</title>
-<style>
-.img-container {
-  position: relative;
-  width: 100%;
-  padding-top: calc(9 / 16 * 100%); /* 16:9的比例。如果是9:16的比例，改为 16 / 9 * 100% */
-  background-color: gray;
-}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Responsive Img Container</title>
+    <style>
+      .container {
+        position: relative;
+        width: 100%;
+        padding-top: calc(
+          9 / 16 * 100%
+        ); /* 16:9的比例。如果是9:16的比例，改为 16 / 9 * 100% */
+      }
 
-.img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-</style>
-</head>
-<body>
-    <!-- <div class="img-container"></div> -->
+      .content {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
 
-    <div class="img-container">
-        <img class="img" src="https://img1.baidu.com/it/u=1571454416,119170533&fm=253&fmt=auto&app=138&f=JPEG?w=889&h=500" alt="">
+        background-color: burlywood; /*测试显示用*/
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="content"></div>
     </div>
 
-    <!-- <img class="img" src="https://img1.baidu.com/it/u=1571454416,119170533&fm=253&fmt=auto&app=138&f=JPEG?w=889&h=500" alt="">
-    你好 -->
-</body>
+    <!-- <img
+      src="https://img1.baidu.com/it/u=1571454416,119170533&fm=253&fmt=auto&app=138&f=JPEG?w=889&h=500"
+      alt=""
+    />
+    <div>被顶的文字</div> -->
+
+    <!-- <h1>容器占位，更好的用户体验</h1>
+    <div class="container">
+      <img
+        class="content"
+        src="https://img1.baidu.com/it/u=1571454416,119170533&fm=253&fmt=auto&app=138&f=JPEG?w=889&h=500"
+        alt=""
+      />
+    </div>
+    <div>不会被顶的文字</div> -->
+  </body>
 </html>

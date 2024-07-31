@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>换脸效果</title>
+    <style>
+      body {
+        /* display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background-color: #e2e8f0;
+        margin: 0; */
+      }
+
+      .wrapper_w {
+        width: 800px;
+        background-color: pink;
+      }
+      .wrapper_h {
+        position: relative;
+        /* width: 600px; */
+        /* height: 800px; */
+      }
+      .facepart {
+        position: absolute;
+        width: 100%;
+        overflow: hidden;
+      }
+      .pos_rel {
+        position: relative;
+      }
+      .facepart img {
+        position: absolute;
+        width: 100%;
+        transition: transform 0.5s ease-in-out;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper_w">
+      <div class="wrapper_h">
+        <div class="facepart" data-part="1">
+          <div class="pos_rel">
+            <img src="https://placehold.co/600x200?text=Image+1" alt="face1" data-width="600" data-height="200" />
+          </div>
+        </div>
+        <div class="facepart" data-part="2">
+          <div class="pos_rel">
+            <img src="https://placehold.co/600x200?text=Image+2" alt="face2" data-width="600" data-height="200" />
+          </div>
+        </div>
+        <div class="facepart" data-part="3">
+          <div class="pos_rel">
+            <img src="https://placehold.co/600x200?text=Image+3" alt="face3" data-width="600" data-height="200" />
+          </div>
+        </div>
+        <div class="facepart" data-part="4" id="faces_c">
+          <div class="pos_rel">
+            <img src="https://placehold.co/600x200?text=Image+4" alt="face4" data-width="600" data-height="200" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const images = [
+        ['https://placehold.co/600x200?text=Image+1-1', 'https://placehold.co/600x200?text=Image+1-2', 'https://placehold.co/600x200?text=Image+1-3'],
+        ['https://placehold.co/600x200?text=Image+2-1', 'https://placehold.co/600x200?text=Image+2-2', 'https://placehold.co/600x200?text=Image+2-3'],
+        ['https://placehold.co/600x200?text=Image+3-1', 'https://placehold.co/600x200?text=Image+3-2', 'https://placehold.co/600x200?text=Image+3-3'],
+        ['https://placehold.co/600x200?text=Image+4-1', 'https://placehold.co/600x200?text=Image+4-2', 'https://placehold.co/600x200?text=Image+4-3'],
+      ];
+
+      const imageIndices = [0, 0, 0, 0];
+      let autoSwitch = true;
+
+      function createImages(partIndex) {
+        const part = document.querySelector(`.facepart[data-part="${partIndex + 1}"] .pos_rel`);
+        images[partIndex].forEach((src, index) => {
+          const img = document.createElement('img');
+          img.src = src;
+          img.dataset.width = 600; // Update with the correct width
+          img.dataset.height = 200; // Update with the correct height
+          img.style.top = index === 0 ? '0' : '200px';
+          part.appendChild(img);
+        });
+      }
+
+      function changeImage(element, index) {
+        if (!autoSwitch) {
+          const imgs = element.querySelectorAll('img');
+          imageIndices[index] = (imageIndices[index] + 1) % images[index].length;
+          const nextImage = images[index][imageIndices[index]];
+
+          const newImg = document.createElement('img');
+          newImg.src = nextImage;
+          newImg.dataset.width = 600; // Update with the correct width
+          newImg.dataset.height = 200; // Update with the correct height
+          newImg.style.top = '200px';
+          element.querySelector('.pos_rel').appendChild(newImg);
+          setTimeout(() => {
+            newImg.style.transform = 'translateY(-200px)';
+          }, 10);
+        }
+      }
+
+      function autoChangeImage(index) {
+        if (index < 0) {
+          autoSwitch = false;
+          return;
+        }
+        const imgs = document.querySelectorAll(`.facepart[data-part="${index + 1}"] img`);
+        imageIndices[index] = (imageIndices[index] + 1) % images[index].length;
+        const nextImage = images[index][imageIndices[index]];
+        const newImg = document.createElement('img');
+        newImg.src = nextImage;
+        newImg.dataset.width = 600; // Update with the correct width
+        newImg.dataset.height = 200; // Update with the correct height
+        newImg.style.top = '200px';
+        document.querySelector(`.facepart[data-part="${index + 1}"] .pos_rel`).appendChild(newImg);
+        setTimeout(() => {
+          newImg.style.transform = 'translateY(-200px)';
+          setTimeout(() => autoChangeImage(index - 1), 500);
+        }, 10);
+      }
+
+      function updateFaceParts() {
+        const wrapper = document.querySelector('.wrapper_h');
+        const wrapperWidth = wrapper.offsetWidth;
+
+        document.querySelectorAll('.facepart').forEach((part) => {
+          const img = part.querySelector('img');
+          const imgWidth = img.dataset.width;
+          const imgHeight = img.dataset.height;
+          const ratio = imgHeight / imgWidth;
+
+          const partHeight = wrapperWidth * ratio;
+          part.style.height = `${partHeight}px`;
+          const partIndex = part.dataset.part - 1;
+          part.style.top = `${partIndex * partHeight}px`;
+        });
+      }
+
+      document.querySelectorAll('.facepart').forEach((part, index) => {
+        createImages(index);
+        part.addEventListener('click', () => changeImage(part, index));
+      });
+
+      window.addEventListener('resize', updateFaceParts);
+      document.addEventListener('DOMContentLoaded', () => {
+        updateFaceParts();
+
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setTimeout(() => autoChangeImage(3), 1000);
+              observer.unobserve(entry.target);
+            }
+          });
+        });
+
+        observer.observe(document.getElementById('faces_c'));
+      });
+    </script>
+  </body>
+</html>
