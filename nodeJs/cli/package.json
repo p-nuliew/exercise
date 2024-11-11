@@ -1,8 +1,10 @@
 {
   "type": "module",
   "bin": {
-     "wl-cli": "nodeJs/cli/index.js"
-   },
+    "cwl-cli": "./index.js"
+  },
+  "name": "cwl-cli",
+  "version": "1.0.0",
   "dependencies": {
     "commander": "^12.1.0",
     "download-git-repo": "^3.0.2",
