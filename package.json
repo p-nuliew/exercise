@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "browser-sync": "^3.0.3",
-    "ejs": "^3.1.10"
+    "ejs": "^3.1.10",
+    "http-proxy-middleware": "^3.0.3"
   }
 }
