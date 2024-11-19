@@ -4,6 +4,8 @@
     "browser-sync": "^3.0.3",
     "ejs": "^3.1.10",
     "http-proxy-middleware": "^3.0.3",
-    "mime": "^4.0.4"
+    "js-yaml": "^4.1.0",
+    "mime": "^4.0.4",
+    "nodemailer": "^6.9.16"
   }
 }
