@@ -1,7 +1,9 @@
 {
+  "type": "module",
   "dependencies": {
     "browser-sync": "^3.0.3",
     "ejs": "^3.1.10",
-    "http-proxy-middleware": "^3.0.3"
+    "http-proxy-middleware": "^3.0.3",
+    "mime": "^4.0.4"
   }
 }
