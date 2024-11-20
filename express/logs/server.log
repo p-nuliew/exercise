@@ -1,0 +1,8 @@
+[2024-11-20T13:44:57.199] [DEBUG] default - POST /user/login
+[2024-11-20T13:44:58.389] [DEBUG] default - POST /user/login
+[2024-11-20T14:01:44.676] [DEBUG] default - POST /user/register
+[2024-11-20T14:01:46.622] [DEBUG] default - POST /user/register
+[2024-11-20T14:01:47.779] [DEBUG] default - POST /user/register
+[2024-11-20T14:01:50.994] [DEBUG] default - POST /user/login
+[2024-11-20T14:01:57.935] [DEBUG] default - POST /user/login
+[2024-11-20T14:01:58.591] [DEBUG] default - POST /user/login

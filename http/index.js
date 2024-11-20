@@ -6,7 +6,6 @@ http
   .createServer((req, res) => {
     const { pathname, query } = url.parse(req.url, true); // 解析请求的 URL，获取路径和查询参数
 
-    console.log('pathname', pathname);
     if (req.method === 'POST') {
       // 检查请求方法是否为 POST
       if (pathname === '/post') {
@@ -30,7 +29,7 @@ http
       // 检查请求方法是否为 GET
       if (pathname === '/get') {
         // 检查路径是否为 '/get'
-        console.log(query.a); // 打印查询参数中的键名为 'a' 的值
+        console.log('query:', query.a); // 打印查询参数中的键名为 'a' 的值
         res.end('get success'); // 返回 'get success' 作为响应体
       }
     }
