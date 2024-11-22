@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      // fetch('http://localhost:3000/info')
+      //   .then((res) => {
+      //     return res.json();
+      //   })
+      //   .then((res) => {
+      //     console.log(res);
+      //   });
+
+      // fetch('http://localhost:3000/info', {
+      //   method: 'PATCH',
+      // })
+      //   .then((res) => {
+      //     return res.json();
+      //   })
+      //   .then((res) => {
+      //     console.log(res);
+      //   });
+
+      fetch('http://localhost:3000/info', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: 'xmzs' }),
+      })
+        .then((res) => {
+          return res.json();
+        })
+        .then((res) => {
+          console.log(res);
+        });
+
+      fetch('http://localhost:3000/info2')
+        .then((res) => {
+          const headers = res.headers;
+          console.log(headers.get('xmzs')); //读取自定义响应头
+
+          return res.json();
+        })
+        .then((res) => {
+          console.log(res);
+        });
+
+      const sse = new EventSource('http://localhost:3000/sse');
+      sse.addEventListener('test', (event) => {
+        console.log(event.data);
+      });
+    </script>
+  </body>
+</html>
