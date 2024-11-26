@@ -1,6 +1,7 @@
 {
   "type": "module",
   "dependencies": {
+    "@prisma/client": "^5.22.0",
     "browser-sync": "^3.0.3",
     "ejs": "^3.1.10",
     "express": "^4.21.1",
@@ -9,5 +10,8 @@
     "log4js": "^6.9.1",
     "mime": "^4.0.4",
     "nodemailer": "^6.9.16"
+  },
+  "devDependencies": {
+    "prisma": "^5.22.0"
   }
 }
