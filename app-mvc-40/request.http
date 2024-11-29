@@ -1,0 +1,1 @@
+GET http://localhost:98/user/index HTTP/1.1

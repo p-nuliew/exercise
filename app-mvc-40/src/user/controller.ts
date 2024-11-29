@@ -14,13 +14,14 @@ export class UserController {
 
   @GetMapping('/index') //get请求
   public async getIndex(req: Request, res: Response) {
-    console.log(req?.user.id);
+    // console.log(req?.user.id);
     const info = await this.userService.getUserInfo();
     res.send(info);
   }
 
   @PostMapping('/create') //post请求
   public async createUser(req: Request, res: Response) {
+    console.log(req.body);
     const user = await this.userService.createUser(req.body);
     res.send(user);
   }

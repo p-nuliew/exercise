@@ -1,19 +1,26 @@
 {
-  "name": "app-mvc",
+  "name": "app-mvc2",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "ts-node main.ts"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@prisma/client": "^5.22.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "express": "^4.21.1",
     "inversify": "^6.1.4",
     "inversify-express-utils": "^6.4.7",
+    "prisma": "^6.0.0",
     "reflect-metadata": "^0.2.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
   }
 }
