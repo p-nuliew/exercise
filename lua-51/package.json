@@ -1,0 +1,16 @@
+{
+  "type": "module",
+  "name": "lua-51",
+  "version": "1.0.0",
+  "description": "redis+lua+nodejs实现抽奖限流阀",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.2",
+    "ioredis": "^5.4.1"
+  }
+}
