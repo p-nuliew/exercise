@@ -6,16 +6,12 @@
     <title>Document</title>
   </head>
   <body>
-    <button>下载</button>
+    <button>下载二进制流文件</button>
+
+    <button id="text">下载二进制流文字,并逐字显示</button>
+    <textarea name="" id="textarea" cols="30" rows="10" id=""></textarea>
 
     <script>
-      // document.querySelector('button').addEventListener('click', () => {
-      //   const a = document.createElement('a');
-      //   a.href = './static/12.png';
-      //   a.download = 'baidu';
-      //   a.click();
-      // });
-
       document.querySelector('button').addEventListener('click', () => {
         fetch('http://127.0.0.1:3000/download', {
           method: 'POST',
@@ -39,6 +35,45 @@
             console.log('err', err);
           });
       });
+
+      document.querySelector('#text').addEventListener('click', () => {
+        fetch('http://127.0.0.1:3000/download/text', {
+          method: 'POST',
+          body: JSON.stringify({
+            filename: '34.txt',
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+          .then((res) => res.arrayBuffer())
+          .then((res) => {
+            const blob = new Blob([res], { type: 'text/plain' });
+
+            const reader = new FileReader();
+            reader.readAsText(blob);
+            reader.onload = () => {
+              const text = reader.result;
+              const textarea = document.querySelector('#textarea');
+
+              // 像chatgpt一样将文字一个个写入textarea
+              showTextStepByStep(text, textarea, 100);
+            };
+          })
+          .catch((err) => {});
+      });
+
+      function showTextStepByStep(text, textarea, delay) {
+        let index = 0;
+        const interval = setInterval(() => {
+          if (index < text.length) {
+            textarea.value += text[index];
+            index++;
+          } else {
+            clearInterval(interval);
+          }
+        }, delay);
+      }
     </script>
   </body>
 </html>

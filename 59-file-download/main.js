@@ -12,8 +12,18 @@ app.post('/download', (req, res) => {
   const filename = req.body.filename;
   const filePath = path.join(process.cwd(), 'static', filename);
   const content = fs.readFileSync(filePath);
-  res.setHeader('Content-Type', 'application/octet-stream'); // octet-stream 二进制流
+  // res.setHeader('Content-Type', 'application/octet-stream'); // octet-stream 通用的二进制流类型
+  res.setHeader('Content-Type', 'application/image/png'); // 具体的二进制流类型,如image/png
   // res.setHeader('Content-Disposition', `attachment; filename=${filename}`); // attachment 附件, 直接下载
+  res.send(content);
+});
+
+app.post('/download/text', (req, res) => {
+  const filename = req.body.filename;
+  const filePath = path.join(process.cwd(), 'static', filename);
+  const content = fs.readFileSync(filePath);
+  res.setHeader('Content-Type', 'application/octet-stream'); // octet-stream 通用的二进制流类型
+  res.setHeader('Content-Disposition', `attachment; filename=${filename}`); // attachment 附件, 直接下载
   res.send(content);
 });
 
