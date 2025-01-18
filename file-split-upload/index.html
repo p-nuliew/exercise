@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <input id="file" type="file" />
+    <!--用来上传文件-->
+
+    <script>
+      const file = document.getElementById('file');
+
+      const chunkFun = (file, size = 1024 * 1024 * 1) => {
+        const chunks = []; // 1-4 4-8 [blob blob]
+        for (let i = 0; i < file.size; i += size) {
+          chunks.push(file.slice(i, i + size));
+        }
+        return chunks;
+      };
+
+      const uploadFile = (chunks) => {
+        const List = [];
+        for (let i = 0; i < chunks.length; i++) {
+          const formData = new FormData();
+          formData.append('index', i);
+          formData.append('total', chunks.length);
+          formData.append('fileName', 'xiezhen');
+          formData.append('file', chunks[i]); // 必须写在最后
+          List.push(
+            fetch('http://127.0.0.1:3000/up', {
+              method: 'POST',
+              body: formData,
+            })
+              .then((res) => {
+                console.log(121, res);
+              })
+              .catch((err) => {
+                console.log({ err });
+              }),
+          );
+        }
+        Promise.all(List).then((res) => {
+          fetch('http://127.0.0.1:3000/merge', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              fileName: 'xiaoManXieZhen',
+            }),
+          }).then((res) => {
+            console.log(res);
+          });
+        });
+      };
+
+      file.addEventListener('change', (event) => {
+        const file = event.target.files[0]; //获取文件信息. file 对象底层是基于blob,可以调用blob的slice方法进行切片
+        console.log('file', file);
+        const chunks = chunkFun(file);
+        uploadFile(chunks);
+      });
+
+      function getList() {
+        fetch('http://127.0.0.1:3000/list', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }).then((res) => {
+          console.log(res);
+        });
+      }
+      // getList();
+    </script>
+  </body>
+</html>
